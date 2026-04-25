@@ -3,6 +3,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const authRoutes = require('./Presentation/Routes/authRoutes');
+const disasterRoutes = require('./Presentation/Routes/disasterRoutes');
+const geographyRoutes = require('./Presentation/Routes/geographyRoutes');
 const { swaggerUi, specs } = require('./Presentation/Docs/swagger');
 
 const app = express();
@@ -18,6 +20,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Rotalar
 app.use('/api/auth', authRoutes);
+app.use('/api/disaster', disasterRoutes);
+app.use('/api/geography', geographyRoutes);
 
 // Health Check
 app.use('/health', (req, res) => {

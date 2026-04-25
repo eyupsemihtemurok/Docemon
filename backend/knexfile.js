@@ -19,6 +19,9 @@ module.exports = {
     },
     migrations: {
       directory: './Infrastructure/Persistence/Migrations'
+    },
+    seeds: {
+      directory: './Infrastructure/Persistence/Seeds'
     }
   },
 
@@ -37,6 +40,9 @@ module.exports = {
     },
     migrations: {
       directory: './Infrastructure/Persistence/Migrations'
+    },
+    seeds: {
+      directory: './Infrastructure/Persistence/Seeds'
     }
   }
 };

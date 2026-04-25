@@ -11,6 +11,7 @@ class User {
         phone,
         faceData,
         isActive = true,
+        status = 'SAFE', // Default status from UserStatus enum
         createdAt = new Date(),
         updatedAt = new Date()
     } = {}) {
@@ -25,6 +26,7 @@ class User {
         this.phone = phone;
         this.faceData = faceData;
         this.isActive = isActive;
+        this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
