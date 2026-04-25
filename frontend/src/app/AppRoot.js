@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { SafeAreaView, StyleSheet, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import DashboardNavbar from '../components/dashboard/DashboardNavbar';
 import DashboardSidePanel from '../components/dashboard/DashboardSidePanel';
 import { DASHBOARD_MENU_ITEMS, ROUTES } from '../constants/routes';
@@ -7,19 +7,64 @@ import useWebRouter from '../hooks/useWebRouter';
 import DashboardScreen from '../screens/DashboardScreen';
 import HomeScreen from '../screens/HomeScreen';
 import LoginPage from '../screens/LoginPage';
+import ProfileScreen from '../screens/ProfileScreen';
+import { fetchCurrentUser } from '../services/authApi';
+import { clearAuthToken, getAuthToken, setAuthToken } from '../services/authStorage';
 
 export default function AppRoot() {
   const { path, navigate, replace } = useWebRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeMenuItemId, setActiveMenuItemId] = useState(DASHBOARD_MENU_ITEMS[0].id);
+  const [isAuthReady, setIsAuthReady] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const bootstrapAuth = async () => {
+      const storedToken = getAuthToken();
+
+      if (!storedToken) {
+        if (isMounted) {
+          setIsAuthReady(true);
+        }
+        return;
+      }
+
+      try {
+        await fetchCurrentUser(storedToken);
+        if (isMounted) {
+          setIsAuthenticated(true);
+        }
+      } catch {
+        clearAuthToken();
+        if (isMounted) {
+          setIsAuthenticated(false);
+        }
+      } finally {
+        if (isMounted) {
+          setIsAuthReady(true);
+        }
+      }
+    };
+
+    bootstrapAuth();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const activeMenuItemLabel = useMemo(() => {
     const active = DASHBOARD_MENU_ITEMS.find((item) => item.id === activeMenuItemId);
     return active ? active.label : DASHBOARD_MENU_ITEMS[0].label;
   }, [activeMenuItemId]);
 
-  const handleLogin = () => {
+  const handleLogin = (authResult) => {
+    if (authResult?.token) {
+      setAuthToken(authResult.token);
+    }
+
     setIsAuthenticated(true);
     replace(ROUTES.DASHBOARD);
   };
@@ -35,10 +80,14 @@ export default function AppRoot() {
     }
 
     if (path === ROUTES.LOGIN) {
-      return <LoginPage onLogin={handleLogin} />;
+      return <LoginPage onLogin={handleLogin} navigate={navigate} />;
     }
 
     if (path === ROUTES.DASHBOARD) {
+      if (!isAuthReady) {
+        return null;
+      }
+
       if (!isAuthenticated) {
         replace(ROUTES.LOGIN);
         return null;
@@ -46,10 +95,6 @@ export default function AppRoot() {
 
       return (
         <View style={styles.dashboardWrapper}>
-          <DashboardNavbar
-            userName="Mete"
-            onToggleMenu={() => setIsMenuOpen((prev) => !prev)}
-          />
           <DashboardScreen activeMenuItem={activeMenuItemLabel} />
           <DashboardSidePanel
             visible={isMenuOpen}
@@ -62,11 +107,33 @@ export default function AppRoot() {
       );
     }
 
+    if (path === ROUTES.PROFILE) {
+      if (!isAuthReady) {
+        return null;
+      }
+
+      if (!isAuthenticated) {
+        replace(ROUTES.LOGIN);
+        return null;
+      }
+      return <ProfileScreen navigate={navigate} />;
+    }
+
     replace(ROUTES.HOME);
     return null;
   };
 
-  return <SafeAreaView style={styles.root}>{renderPage()}</SafeAreaView>;
+  return (
+    <SafeAreaView style={styles.root}>
+      {path !== ROUTES.HOME && path !== ROUTES.LOGIN && (
+        <DashboardNavbar
+          userName="Mete"
+          onProfilePress={() => navigate(ROUTES.PROFILE)}
+        />
+      )}
+      {renderPage()}
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({

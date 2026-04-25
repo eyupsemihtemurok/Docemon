@@ -1,4 +1,5 @@
 const IUserRepository = require('../../../Application/Interfaces/IUserRepository');
+const crypto = require('crypto');
 const db = require('../KnexContext');
 
 class UserRepository extends IUserRepository {
@@ -15,16 +16,15 @@ class UserRepository extends IUserRepository {
         return await db(this.tableName).where({ email }).first();
     }
 
-    async getByNationalId(nationalIdHash) {
-        return await db(this.tableName).where({ national_id: nationalIdHash }).first();
-    }
-
     async create(userData) {
-        const [id] = await db(this.tableName).insert({
+        const id = userData.id || crypto.randomUUID();
+
+        await db(this.tableName).insert({
             ...userData,
-            id: userData.id || db.raw('NEWID()')
-        }).returning('id');
-        return { ...userData, id };
+            id
+        });
+
+        return await this.getById(id);
     }
 
     async update(id, userData) {
@@ -55,7 +55,7 @@ class UserRepository extends IUserRepository {
     async getVerificationAlerts() {
         return await db('verification_alert')
             .join('user', 'verification_alert.user_id', '=', 'user.id')
-            .select('verification_alert.*', 'user.full_name', 'user.national_id');
+            .select('verification_alert.*', 'user.full_name', 'user.email');
     }
 
     async updateVerificationStatus(alertId, status) {

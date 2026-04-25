@@ -9,6 +9,9 @@ export default StyleSheet.create({
     padding: 18,
     gap: 14,
     paddingBottom: 40,
+    maxWidth: 800,
+    width: '100%',
+    alignSelf: 'center',
   },
   heroCard: {
     borderRadius: 24,
@@ -24,7 +27,7 @@ export default StyleSheet.create({
   },
   eyebrow: {
     color: '#15803d',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1.2,
     textTransform: 'uppercase',
@@ -46,14 +49,14 @@ export default StyleSheet.create({
   },
   panelContent: {
     color: '#475569',
-    fontSize: 13,
+    fontSize: 14,
     marginTop: 10,
     lineHeight: 20,
   },
 
   title: {
     color: '#052e16',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '900',
     lineHeight: 28,
   },
@@ -65,9 +68,15 @@ export default StyleSheet.create({
   },
   sectionTitleEmbedded: {
     color: '#052e16',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '900',
-    marginBottom: 12,
+    marginBottom: 8,
+  },
+  sectionDescription: {
+    color: '#475569',
+    fontSize: 14,
+    lineHeight: 18,
+    marginTop: 4,
   },
   categoryTitle: {
     fontSize: 14,
@@ -120,11 +129,32 @@ export default StyleSheet.create({
     fontSize: 12,
     fontWeight: '800',
   },
-  statsRow: {
+  liveActionsRow: {
     flexDirection: 'row',
-    gap: 10,
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 8,
     flexWrap: 'wrap',
-    marginTop: 10,
+  },
+  affectedTrigger: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#fecaca',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    boxShadow: '0 8px 20px rgba(225, 29, 72, 0.08)',
+  },
+  affectedTriggerText: {
+    color: '#9f1239',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  affectedTriggerIcon: {
+    fontSize: 16,
   },
   statCard: {
     flexGrow: 1,
@@ -144,7 +174,7 @@ export default StyleSheet.create({
   statLabel: {
     color: '#4b5563',
     marginTop: 2,
-    fontSize: 12,
+    fontSize: 11,
   },
   detailsGrid: {
     backgroundColor: '#f8fafc',
@@ -162,7 +192,7 @@ export default StyleSheet.create({
   },
   detailLabel: {
     color: '#64748b',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -170,7 +200,7 @@ export default StyleSheet.create({
   },
   detailValue: {
     color: '#1e293b',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
   },
   sectionHeader: {
@@ -242,7 +272,7 @@ export default StyleSheet.create({
   },
   personName: {
     color: '#052e16',
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '900',
   },
   personLocation: {
@@ -254,6 +284,7 @@ export default StyleSheet.create({
   personStatus: {
     color: '#475569',
     marginTop: 8,
+    fontSize: 14,
     lineHeight: 20,
   },
   colorCaptionRow: {
@@ -339,6 +370,157 @@ export default StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  modalTitleContainer: {
+    flex: 1,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#64748b',
+    marginTop: 4,
+    lineHeight: 20,
+    fontWeight: '500',
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#f1f5f9',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    fontSize: 18,
+    color: '#64748b',
+    fontWeight: '800',
+  },
+  modalScroll: {
+    marginVertical: 4,
+  },
+  modalPersonCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+  },
+  modalPersonInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  personAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#ffffff',
+    boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+  },
+  personAvatarText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  modalPersonName: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#0f172a',
+  },
+  modalPersonStatus: {
+    fontSize: 13,
+    color: '#e11d48',
+    fontWeight: '800',
+    marginTop: 2,
+  },
+  modalPersonLocationWrap: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+  },
+  modalPersonLocation: {
+    fontSize: 12,
+    color: '#64748b',
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  // Form Styles
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#334155',
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  premiumInput: {
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 14,
+    padding: 14,
+    fontSize: 14,
+    color: '#0f172a',
+    fontWeight: '600',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+  },
+  dropdownWrap: {
+    flexDirection: 'row',
+    paddingVertical: 4,
+  },
+  personChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 12,
+    padding: 8,
+    paddingRight: 12,
+    gap: 8,
+  },
+  personChipSelected: {
+    borderColor: '#15803d',
+    backgroundColor: '#f0fdf4',
+    borderWidth: 2,
+  },
+  chipAvatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chipAvatarText: {
+    color: '#ffffff',
+    fontSize: 10,
+    fontWeight: '900',
+  },
+  chipName: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  chipNameSelected: {
+    color: '#15803d',
+  },
+  modalFooterActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 10,
+  },
   // FAB Styles
   fab: {
     position: 'absolute',
@@ -378,6 +560,7 @@ export default StyleSheet.create({
     bottom: 100,
     alignItems: 'flex-end',
     gap: 12,
+    zIndex: 1001,
   },
   menuItemPill: {
     flexDirection: 'row',
@@ -394,13 +577,23 @@ export default StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
   },
+  menuItemPillPrimary: {
+    backgroundColor: '#15803d',
+    borderColor: '#15803d',
+  },
   menuItemText: {
     color: '#334155',
     fontSize: 14,
     fontWeight: '700',
     marginRight: 8,
   },
+  menuItemTextPrimary: {
+    color: '#ffffff',
+  },
   menuItemIcon: {
     fontSize: 18,
+  },
+  menuItemIconPrimary: {
+    // Optional: add specific icon style if needed
   },
 });

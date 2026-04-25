@@ -15,7 +15,6 @@ exports.seed = async function(knex) {
   const users = [
     {
       id: 'A1111111-1111-1111-1111-111111111111',
-      national_id: 'hash_tc_1', // Gerçek senaryoda SecurityService.hashDeterministic kullanırız
       full_name: 'Ahmet Yılmaz',
       email: 'ahmet@test.com',
       password: passwordHash,
@@ -25,7 +24,6 @@ exports.seed = async function(knex) {
     },
     {
       id: 'B2222222-2222-2222-2222-222222222222',
-      national_id: 'hash_tc_2',
       full_name: 'Ayşe Demir',
       email: 'ayse@test.com',
       password: passwordHash,
@@ -35,7 +33,6 @@ exports.seed = async function(knex) {
     },
     {
       id: 'C3333333-3333-3333-3333-333333333333',
-      national_id: 'hash_tc_3',
       full_name: 'Mehmet Kaya',
       email: 'mehmet@test.com',
       password: passwordHash,

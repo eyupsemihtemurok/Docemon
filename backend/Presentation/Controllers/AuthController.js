@@ -7,8 +7,11 @@ const authService = new AuthService(userRepository);
 class AuthController {
     static async register(req, res) {
         try {
-            const user = await authService.register(req.body);
-            res.status(201).json({ message: 'User registered successfully.', user });
+            const result = await authService.register(req.body);
+            res.status(201).json({
+                message: 'User registered successfully.',
+                ...result
+            });
         } catch (err) {
             res.status(400).json({ error: err.message });
         }

@@ -2,6 +2,7 @@ export const ROUTES = {
   HOME: '/home',
   LOGIN: '/loginPage',
   DASHBOARD: '/dashboard',
+  PROFILE: '/profile',
 };
 
 export const DASHBOARD_MENU_ITEMS = [

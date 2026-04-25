@@ -6,35 +6,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const PEOPLE = [
-  {
-    id: 'p1',
-    initials: 'AY',
-    name: 'Aylin Yilmaz',
-    location: 'Hatay / Merkez',
-    status: 'Son gorulme: enkaz alani',
-    accent: '#22c55e',
-    badge: 'YENI',
-  },
-  {
-    id: 'p2',
-    initials: 'MK',
-    name: 'Mert Kaya',
-    location: 'Kahramanmaras / Dulkadiroglu',
-    status: 'Aile bildirimi bekleniyor',
-    accent: '#16a34a',
-    badge: 'ACIL',
-  },
-  {
-    id: 'p3',
-    initials: 'SE',
-    name: 'Seda Erdem',
-    location: 'Gaziantep / Sehitkamil',
-    status: 'Goruntulu eslesme araniyor',
-    accent: '#15803d',
-    badge: 'TAKIP',
-  },
-];
+// PEOPLE list removed
 
 const NEAR_RELATIVES = [
   { id: 'nr1', initials: 'BT', name: 'Burak Tan', location: 'Adiyaman / Besni', status: 'Enkaz altinda olabilir', accent: '#ef4444', category: 'danger' },
@@ -42,11 +14,7 @@ const NEAR_RELATIVES = [
   { id: 'nr3', initials: 'AS', name: 'Ahmet Sabun', location: 'Adiyaman / Merkez', status: 'Guvenli bolgede', accent: '#22c55e', category: 'safe' },
 ];
 
-const ACTIONS = [
-  { title: 'Kisi bildir', description: 'Yeni kayip kisi kaydi olustur.' },
-  { title: 'Eslestir', description: 'Benzer bilgiler ile hizli kontrol yap.' },
-  { title: 'Konum paylas', description: 'Gecici konum ve kurtarma bilgisi ekle.' },
-];
+// ACTIONS list removed
 
 const PANELS = [
   { id: 'bildirimler', title: 'Bildirimler', content: 'Henüz yeni bir bildirim bulunmuyor.', isSpecial: true },
@@ -56,6 +24,14 @@ export default function DashboardScreen({ activeMenuItem }) {
   const [expandedPanel, setExpandedPanel] = useState(null);
   const [isTanimlaVisible, setIsTanimlaVisible] = useState(false);
   const [isFabMenuVisible, setIsFabMenuVisible] = useState(false);
+  const [isRelativesExpanded, setIsRelativesExpanded] = useState(true);
+  const [isAffectedModalVisible, setIsAffectedModalVisible] = useState(false);
+  const [isMissingPersonModalVisible, setIsMissingPersonModalVisible] = useState(false);
+  const [reportForm, setReportForm] = useState({
+    personId: '',
+    reason: '',
+    lastContact: ''
+  });
 
   const stats = useMemo(
     () => [
@@ -119,9 +95,21 @@ export default function DashboardScreen({ activeMenuItem }) {
               </View>
             </View>
 
-            <View style={styles.liveBadge}>
-              <View style={styles.liveDot} />
-              <Text style={styles.liveText}>Canli izleme</Text>
+            <View style={styles.liveActionsRow}>
+              <View style={styles.liveBadge}>
+                <View style={styles.liveDot} />
+                <Text style={styles.liveText}>Canli izleme</Text>
+              </View>
+
+              {dangerRelatives.length > 0 && (
+                <Pressable
+                  style={styles.affectedTrigger}
+                  onPress={() => setIsAffectedModalVisible(true)}
+                >
+                  <Text style={styles.affectedTriggerIcon}>⚠️</Text>
+                  <Text style={styles.affectedTriggerText}>Muhtemel Etkilenen Yakınlar ({dangerRelatives.length})</Text>
+                </Pressable>
+              )}
             </View>
           </View>
 
@@ -138,127 +126,261 @@ export default function DashboardScreen({ activeMenuItem }) {
 
         {/* Tehlikedeki Yakınlarım Section */}
         <View style={styles.heroCard}>
-          <Text style={styles.sectionTitleEmbedded}>Yakınlarım</Text>
+          <Pressable
+            style={styles.inlineSectionHeader}
+            onPress={() => setIsRelativesExpanded(!isRelativesExpanded)}
+          >
+            <Text style={[styles.sectionTitleEmbedded, { marginBottom: 0 }]}>Yakınlarım</Text>
+            <Text style={{ fontSize: 18, color: '#15803d' }}>
+              {isRelativesExpanded ? '▲' : '▼'}
+            </Text>
+          </Pressable>
 
-          {dangerRelatives.length > 0 && (
-            <View>
-              <Text style={[styles.categoryTitle, styles.dangerText]}>Potansiyel Tehlike</Text>
-              <View style={styles.peopleGrid}>
-                {dangerRelatives.map((person) => (
-                  <View key={person.id} style={[styles.personCard, { borderColor: '#fecaca' }]}>
-                    <View style={styles.personPhotoWrap}>
-                      <View style={[styles.personPhoto, { backgroundColor: person.accent, width: 50, height: 50 }]}>
-                        <Text style={[styles.personPhotoText, { fontSize: 16 }]}>{person.initials}</Text>
+          {isRelativesExpanded && (
+            <>
+              {dangerRelatives.length > 0 && (
+                <View style={{ marginTop: 12 }}>
+                  <Text style={[styles.categoryTitle, styles.dangerText]}>Potansiyel Tehlike</Text>
+                  <View style={styles.peopleGrid}>
+                    {dangerRelatives.map((person) => (
+                      <View key={person.id} style={[styles.personCard, { borderColor: '#fecaca' }]}>
+                        <View style={styles.personPhotoWrap}>
+                          <View style={[styles.personPhoto, { backgroundColor: person.accent, width: 50, height: 50 }]}>
+                            <Text style={[styles.personPhotoText, { fontSize: 16 }]}>{person.initials}</Text>
+                          </View>
+                          <View style={[styles.badgeWrap, { borderColor: '#fca5a5' }]}>
+                            <Text style={[styles.badgeText, { color: '#dc2626' }]}>TEHLİKEDE</Text>
+                          </View>
+                        </View>
+                        <Text style={styles.personName}>{person.name}</Text>
+                        <Text style={styles.personLocation}>{person.location}</Text>
+                        <Text style={styles.personStatus}>{person.status}</Text>
                       </View>
-                      <View style={[styles.badgeWrap, { borderColor: '#fca5a5' }]}>
-                        <Text style={[styles.badgeText, { color: '#dc2626' }]}>TEHLİKEDE</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.personName}>{person.name}</Text>
-                    <Text style={styles.personLocation}>{person.location}</Text>
-                    <Text style={styles.personStatus}>{person.status}</Text>
+                    ))}
                   </View>
-                ))}
-              </View>
-            </View>
-          )}
+                </View>
+              )}
 
-          {safeRelatives.length > 0 && (
-            <View style={{ marginTop: 16 }}>
-              <Text style={[styles.categoryTitle, styles.safeText]}>Güvende</Text>
-              <View style={styles.peopleGrid}>
-                {safeRelatives.map((person) => (
-                  <View key={person.id} style={[styles.personCard, { borderColor: '#d1fae5' }]}>
-                    <View style={styles.personPhotoWrap}>
-                      <View style={[styles.personPhoto, { backgroundColor: person.accent, width: 50, height: 50 }]}>
-                        <Text style={[styles.personPhotoText, { fontSize: 16 }]}>{person.initials}</Text>
+              {safeRelatives.length > 0 && (
+                <View style={{ marginTop: 16 }}>
+                  <Text style={[styles.categoryTitle, styles.safeText]}>Güvende</Text>
+                  <View style={styles.peopleGrid}>
+                    {safeRelatives.map((person) => (
+                      <View key={person.id} style={[styles.personCard, { borderColor: '#d1fae5' }]}>
+                        <View style={styles.personPhotoWrap}>
+                          <View style={[styles.personPhoto, { backgroundColor: person.accent, width: 50, height: 50 }]}>
+                            <Text style={[styles.personPhotoText, { fontSize: 16 }]}>{person.initials}</Text>
+                          </View>
+                          <View style={[styles.badgeWrap, { borderColor: '#bbf7d0' }]}>
+                            <Text style={[styles.badgeText, { color: '#16a34a' }]}>GÜVENDE</Text>
+                          </View>
+                        </View>
+                        <Text style={styles.personName}>{person.name}</Text>
+                        <Text style={styles.personLocation}>{person.location}</Text>
+                        <Text style={styles.personStatus}>{person.status}</Text>
                       </View>
-                      <View style={[styles.badgeWrap, { borderColor: '#bbf7d0' }]}>
-                        <Text style={[styles.badgeText, { color: '#16a34a' }]}>GÜVENDE</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.personName}>{person.name}</Text>
-                    <Text style={styles.personLocation}>{person.location}</Text>
-                    <Text style={styles.personStatus}>{person.status}</Text>
+                    ))}
                   </View>
-                ))}
-              </View>
-            </View>
+                </View>
+              )}
+            </>
           )}
         </View>
 
         <View style={styles.heroCard}>
           <View style={styles.inlineSectionHeader}>
-            <Text style={styles.sectionTitleEmbedded}>Oncelikli kayip listesi</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.sectionTitleEmbedded}>Afetzede Tanıla</Text>
+              <Text style={styles.sectionDescription}>
+                Bulunan afetzedelerin fotoğraflarını çekerek sistemdeki kayıtlı kişilerle hızlıca sorgulanmasını sağlayabilirsiniz.
+              </Text>
+            </View>
             <Pressable style={styles.tanimlaButton} onPress={() => setIsTanimlaVisible(true)}>
               <Text style={styles.tanimlaButtonText}>Tanımla</Text>
             </Pressable>
           </View>
-
-          <View style={styles.peopleGrid}>
-            {PEOPLE.map((person) => (
-              <View key={person.id} style={styles.personCard}>
-                <View style={styles.personPhotoWrap}>
-                  <View style={[styles.personPhoto, { backgroundColor: person.accent }]}>
-                    <Text style={styles.personPhotoText}>{person.initials}</Text>
-                  </View>
-                  <View style={styles.badgeWrap}>
-                    <Text style={styles.badgeText}>{person.badge}</Text>
-                  </View>
-                </View>
-
-                <Text style={styles.personName}>{person.name}</Text>
-                <Text style={styles.personLocation}>{person.location}</Text>
-                <Text style={styles.personStatus}>{person.status}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Tanımla Modal */}
-        <Modal
-          visible={isTanimlaVisible}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setIsTanimlaVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Tanımlama ekranı</Text>
-
-              <Pressable style={styles.modalButtonSecondary}>
-                <Text style={styles.modalButtonTextSecondary}>📷 Fotoğraf çek</Text>
-              </Pressable>
-
-              <View style={{ flexDirection: 'row', gap: 10 }}>
-                <Pressable
-                  style={[styles.modalButton, { flex: 1 }]}
-                  onPress={() => setIsTanimlaVisible(false)}
-                >
-                  <Text style={styles.modalButtonText}>Gönder</Text>
-                </Pressable>
-
-                <Pressable
-                  style={[styles.modalButtonSecondary, { flex: 1 }]}
-                  onPress={() => setIsTanimlaVisible(false)}
-                >
-                  <Text style={styles.modalButtonTextSecondary}>İptal</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        </Modal>
-
-        <View style={styles.actionRow}>
-          {ACTIONS.map((action) => (
-            <Pressable key={action.title} style={styles.actionCard}>
-              <Text style={styles.actionTitle}>{action.title}</Text>
-              <Text style={styles.actionDescription}>{action.description}</Text>
-            </Pressable>
-          ))}
         </View>
 
       </ScrollView>
+
+      {/* MODALS */}
+      {/* Tanımla Modal */}
+      <Modal
+        visible={isTanimlaVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsTanimlaVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Tanımlama ekranı</Text>
+
+            <Pressable style={styles.modalButtonSecondary}>
+              <Text style={styles.modalButtonTextSecondary}>📷 Fotoğraf çek</Text>
+            </Pressable>
+
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <Pressable
+                style={[styles.modalButton, { flex: 1 }]}
+                onPress={() => setIsTanimlaVisible(false)}
+              >
+                <Text style={styles.modalButtonText}>Gönder</Text>
+              </Pressable>
+
+              <Pressable
+                style={[styles.modalButtonSecondary, { flex: 1 }]}
+                onPress={() => setIsTanimlaVisible(false)}
+              >
+                <Text style={styles.modalButtonTextSecondary}>İptal</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Affected Relatives Modal */}
+      <Modal
+        visible={isAffectedModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsAffectedModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxHeight: '80%', padding: 20 }]}>
+            <View style={styles.modalHeader}>
+              <View style={styles.modalTitleContainer}>
+                <Text style={styles.modalTitle}>Muhtemel Etkilenen Yakınlar</Text>
+                <Text style={styles.modalSubtitle}>Afet bölgesindeki potansiyel risk altındaki yakınlarınız.</Text>
+              </View>
+              <Pressable
+                style={styles.closeButton}
+                onPress={() => setIsAffectedModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>×</Text>
+              </Pressable>
+            </View>
+
+            <ScrollView style={styles.modalScroll}>
+              {dangerRelatives.map((person) => (
+                <View key={person.id} style={styles.modalPersonCard}>
+                  <View style={styles.modalPersonInfo}>
+                    <View style={[styles.personAvatar, { backgroundColor: person.accent }]}>
+                      <Text style={styles.personAvatarText}>{person.initials}</Text>
+                    </View>
+                    <View>
+                      <Text style={styles.modalPersonName}>{person.name}</Text>
+                      <Text style={styles.modalPersonStatus}>{person.status}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.modalPersonLocationWrap}>
+                    <Text style={styles.modalPersonLocation}>📍 {person.location}</Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+
+            <Pressable
+              style={styles.modalButton}
+              onPress={() => setIsAffectedModalVisible(false)}
+            >
+              <Text style={styles.modalButtonText}>Kapat</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Missing Person Report Modal */}
+      <Modal
+        visible={isMissingPersonModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsMissingPersonModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxHeight: '90%', padding: 24 }]}>
+            <View style={styles.modalHeader}>
+              <View style={styles.modalTitleContainer}>
+                <Text style={styles.modalTitle}>Kayıp Şüphesi Bildir</Text>
+                <Text style={styles.modalSubtitle}>Lütfen gerekli bilgileri eksiksiz doldurunuz.</Text>
+              </View>
+              <Pressable
+                style={styles.closeButton}
+                onPress={() => setIsMissingPersonModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>×</Text>
+              </Pressable>
+            </View>
+
+            <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>İletişim Kurulamayan Kişi</Text>
+                <View style={styles.dropdownWrap}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                    {NEAR_RELATIVES.map((person) => (
+                      <Pressable
+                        key={person.id}
+                        style={[
+                          styles.personChip,
+                          reportForm.personId === person.id && styles.personChipSelected
+                        ]}
+                        onPress={() => setReportForm({ ...reportForm, personId: person.id })}
+                      >
+                        <View style={[styles.chipAvatar, { backgroundColor: person.accent }]}>
+                          <Text style={styles.chipAvatarText}>{person.initials}</Text>
+                        </View>
+                        <Text style={[
+                          styles.chipName,
+                          reportForm.personId === person.id && styles.chipNameSelected
+                        ]}>{person.name}</Text>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Bildiri Nedeni</Text>
+                <TextInput
+                  style={[styles.premiumInput, { height: 80, textAlignVertical: 'top' }]}
+                  placeholder="Örn: Telefonuna ulaşılamıyor, konumu değişmiyor..."
+                  multiline
+                  value={reportForm.reason}
+                  onChangeText={(text) => setReportForm({ ...reportForm, reason: text })}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Son İletişim Zamanı ve Şekli</Text>
+                <TextInput
+                  style={styles.premiumInput}
+                  placeholder="Örn: Bugün 14:30, WhatsApp mesajı"
+                  value={reportForm.lastContact}
+                  onChangeText={(text) => setReportForm({ ...reportForm, lastContact: text })}
+                />
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooterActions}>
+              <Pressable
+                style={[styles.modalButton, { flex: 2 }]}
+                onPress={() => {
+                  alert('Bildiri başarıyla gönderildi.');
+                  setIsMissingPersonModalVisible(false);
+                  setReportForm({ personId: '', reason: '', lastContact: '' });
+                }}
+              >
+                <Text style={styles.modalButtonText}>Bildiriyi Gönder</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.modalButtonSecondary, { flex: 1 }]}
+                onPress={() => setIsMissingPersonModalVisible(false)}
+              >
+                <Text style={styles.modalButtonTextSecondary}>İptal</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* FAB Overlay Background */}
       {isFabMenuVisible && (
@@ -281,8 +403,14 @@ export default function DashboardScreen({ activeMenuItem }) {
             <Text style={styles.menuItemIcon}>ℹ️</Text>
           </Pressable>
 
-          <Pressable style={styles.menuItemPill} onPress={() => setIsFabMenuVisible(false)}>
-            <Text style={styles.menuItemText}>Kayıp Şüphesi</Text>
+          <Pressable 
+            style={[styles.menuItemPill, styles.menuItemPillPrimary]} 
+            onPress={() => {
+              setIsFabMenuVisible(false);
+              setIsMissingPersonModalVisible(true);
+            }}
+          >
+            <Text style={[styles.menuItemText, styles.menuItemTextPrimary]}>Kayıp Şüphesi</Text>
             <Text style={styles.menuItemIcon}>🔍</Text>
           </Pressable>
         </View>
