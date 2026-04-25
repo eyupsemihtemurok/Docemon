@@ -59,9 +59,9 @@ services:
       - "8081:8081"
       - "19006:19006"
     environment:
-      - API_URL=http://10.166.171.134:3000
-      - NODE_ENV=development
-      - REACT_NATIVE_PACKAGER_HOSTNAME=10.166.171.134
+      - API_URL=${API_URL}
+      - NODE_ENV=${FRONTEND_NODE_ENV}
+      - REACT_NATIVE_PACKAGER_HOSTNAME=${REACT_NATIVE_PACKAGER_HOSTNAME}
     depends_on:
       - hackathon26-backend
     stdin_open: true
