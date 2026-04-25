@@ -93,3 +93,8 @@ docker-compose.override.yml
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# AI Models (DeepFace & TensorFlow)
+**/.deepface/
+**/weights/**
+face-service/temp_*
