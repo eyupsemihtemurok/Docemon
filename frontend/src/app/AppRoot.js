@@ -5,6 +5,8 @@ import DashboardSidePanel from '../components/dashboard/DashboardSidePanel';
 import { DASHBOARD_MENU_ITEMS, ROUTES } from '../constants/routes';
 import useWebRouter from '../hooks/useWebRouter';
 import DashboardScreen from '../screens/DashboardScreen';
+import DisasterMapScreen from '../screens/DisasterMapScreen';
+import FaceMatchScreen from '../screens/FaceMatchScreen';
 import HomeScreen from '../screens/HomeScreen';
 import LoginPage from '../screens/LoginPage';
 
@@ -50,7 +52,13 @@ export default function AppRoot() {
             userName="Mete"
             onToggleMenu={() => setIsMenuOpen((prev) => !prev)}
           />
-          <DashboardScreen activeMenuItem={activeMenuItemLabel} />
+          {activeMenuItemId === 'page-4' ? (
+            <DisasterMapScreen />
+          ) : activeMenuItemId === 'page-5' ? (
+            <FaceMatchScreen />
+          ) : (
+            <DashboardScreen activeMenuItem={activeMenuItemLabel} />
+          )}
           <DashboardSidePanel
             visible={isMenuOpen}
             onClose={() => setIsMenuOpen(false)}
