@@ -1,4 +1,5 @@
 const IUserRepository = require('../../../Application/Interfaces/IUserRepository');
+const crypto = require('crypto');
 const db = require('../KnexContext');
 
 class UserRepository extends IUserRepository {
@@ -20,11 +21,14 @@ class UserRepository extends IUserRepository {
     }
 
     async create(userData) {
-        const [id] = await db(this.tableName).insert({
+        const id = userData.id || crypto.randomUUID();
+
+        await db(this.tableName).insert({
             ...userData,
-            id: userData.id || db.raw('NEWID()')
-        }).returning('id');
-        return { ...userData, id };
+            id
+        });
+
+        return await this.getById(id);
     }
 
     async update(id, userData) {

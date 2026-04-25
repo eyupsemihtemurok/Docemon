@@ -59,9 +59,16 @@ services:
       - "8081:8081"
       - "19006:19006"
     environment:
-      - API_URL=http://192.168.125.59:3000
+      - API_URL=http://10.23.143.242:3000
+      - EXPO_PUBLIC_API_URL=http://10.23.143.242:3000
       - NODE_ENV=development
-      - REACT_NATIVE_PACKAGER_HOSTNAME=192.168.125.59
+      - REACT_NATIVE_PACKAGER_HOSTNAME=10.23.143.242
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=300
+      - EXPO_USE_POLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - hackathon26-backend
     stdin_open: true

@@ -29,10 +29,15 @@ class AuthService {
             is_active: true
         });
 
+        const token = JwtService.generateToken(newUser);
+
         return {
-            id: newUser.id,
-            fullName: newUser.full_name,
-            email: newUser.email
+            token,
+            user: {
+                id: newUser.id,
+                fullName: newUser.full_name,
+                email: newUser.email
+            }
         };
     }
 
