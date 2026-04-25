@@ -7,6 +7,7 @@ import useWebRouter from '../hooks/useWebRouter';
 import DashboardScreen from '../screens/DashboardScreen';
 import HomeScreen from '../screens/HomeScreen';
 import LoginPage from '../screens/LoginPage';
+import ProfileScreen from '../screens/ProfileScreen';
 
 export default function AppRoot() {
   const { path, navigate, replace } = useWebRouter();
@@ -48,7 +49,7 @@ export default function AppRoot() {
         <View style={styles.dashboardWrapper}>
           <DashboardNavbar
             userName="Mete"
-            onToggleMenu={() => setIsMenuOpen((prev) => !prev)}
+            onProfilePress={() => navigate(ROUTES.PROFILE)}
           />
           <DashboardScreen activeMenuItem={activeMenuItemLabel} />
           <DashboardSidePanel
@@ -60,6 +61,14 @@ export default function AppRoot() {
           />
         </View>
       );
+    }
+
+    if (path === ROUTES.PROFILE) {
+      if (!isAuthenticated) {
+        replace(ROUTES.LOGIN);
+        return null;
+      }
+      return <ProfileScreen navigate={navigate} />;
     }
 
     replace(ROUTES.HOME);

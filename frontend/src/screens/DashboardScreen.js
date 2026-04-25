@@ -6,35 +6,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const PEOPLE = [
-  {
-    id: 'p1',
-    initials: 'AY',
-    name: 'Aylin Yilmaz',
-    location: 'Hatay / Merkez',
-    status: 'Son gorulme: enkaz alani',
-    accent: '#22c55e',
-    badge: 'YENI',
-  },
-  {
-    id: 'p2',
-    initials: 'MK',
-    name: 'Mert Kaya',
-    location: 'Kahramanmaras / Dulkadiroglu',
-    status: 'Aile bildirimi bekleniyor',
-    accent: '#16a34a',
-    badge: 'ACIL',
-  },
-  {
-    id: 'p3',
-    initials: 'SE',
-    name: 'Seda Erdem',
-    location: 'Gaziantep / Sehitkamil',
-    status: 'Goruntulu eslesme araniyor',
-    accent: '#15803d',
-    badge: 'TAKIP',
-  },
-];
+// PEOPLE list removed
 
 const NEAR_RELATIVES = [
   { id: 'nr1', initials: 'BT', name: 'Burak Tan', location: 'Adiyaman / Besni', status: 'Enkaz altinda olabilir', accent: '#ef4444', category: 'danger' },
@@ -42,11 +14,7 @@ const NEAR_RELATIVES = [
   { id: 'nr3', initials: 'AS', name: 'Ahmet Sabun', location: 'Adiyaman / Merkez', status: 'Guvenli bolgede', accent: '#22c55e', category: 'safe' },
 ];
 
-const ACTIONS = [
-  { title: 'Kisi bildir', description: 'Yeni kayip kisi kaydi olustur.' },
-  { title: 'Eslestir', description: 'Benzer bilgiler ile hizli kontrol yap.' },
-  { title: 'Konum paylas', description: 'Gecici konum ve kurtarma bilgisi ekle.' },
-];
+// ACTIONS list removed
 
 const PANELS = [
   { id: 'bildirimler', title: 'Bildirimler', content: 'Henüz yeni bir bildirim bulunmuyor.', isSpecial: true },
@@ -189,29 +157,15 @@ export default function DashboardScreen({ activeMenuItem }) {
 
         <View style={styles.heroCard}>
           <View style={styles.inlineSectionHeader}>
-            <Text style={styles.sectionTitleEmbedded}>Oncelikli kayip listesi</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.sectionTitleEmbedded}>Afetzede Tanıla</Text>
+              <Text style={styles.sectionDescription}>
+                Bulunan afetzedelerin fotoğraflarını çekerek sistemdeki kayıtlı kişilerle hızlıca sorgulanmasını sağlayabilirsiniz.
+              </Text>
+            </View>
             <Pressable style={styles.tanimlaButton} onPress={() => setIsTanimlaVisible(true)}>
               <Text style={styles.tanimlaButtonText}>Tanımla</Text>
             </Pressable>
-          </View>
-
-          <View style={styles.peopleGrid}>
-            {PEOPLE.map((person) => (
-              <View key={person.id} style={styles.personCard}>
-                <View style={styles.personPhotoWrap}>
-                  <View style={[styles.personPhoto, { backgroundColor: person.accent }]}>
-                    <Text style={styles.personPhotoText}>{person.initials}</Text>
-                  </View>
-                  <View style={styles.badgeWrap}>
-                    <Text style={styles.badgeText}>{person.badge}</Text>
-                  </View>
-                </View>
-
-                <Text style={styles.personName}>{person.name}</Text>
-                <Text style={styles.personLocation}>{person.location}</Text>
-                <Text style={styles.personStatus}>{person.status}</Text>
-              </View>
-            ))}
           </View>
         </View>
 
@@ -249,14 +203,7 @@ export default function DashboardScreen({ activeMenuItem }) {
           </View>
         </Modal>
 
-        <View style={styles.actionRow}>
-          {ACTIONS.map((action) => (
-            <Pressable key={action.title} style={styles.actionCard}>
-              <Text style={styles.actionTitle}>{action.title}</Text>
-              <Text style={styles.actionDescription}>{action.description}</Text>
-            </Pressable>
-          ))}
-        </View>
+        {/* ACTIONS Row Removed */}
 
       </ScrollView>
 
