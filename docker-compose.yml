@@ -34,5 +34,23 @@ services:
     environment:
       - API_URL=http://localhost:3000
 
+  hackathon26-info:
+    image: alpine
+    container_name: hackathon26-info
+    depends_on:
+      - hackathon26-backend
+      - hackathon26-frontend
+    command: >
+      sh -c "echo ' ' &&
+             echo '================================================' &&
+             echo '🚀 hackathon26 PROJESİ BAŞARIYLA BAŞLATILDI!' &&
+             echo '================================================' &&
+             echo ' ' &&
+             echo '🌐 Frontend (Web): http://localhost:19006' &&
+             echo '⚙️  Backend (API):  http://localhost:3000' &&
+             echo '💾 MSSQL Server:   localhost:1433
+             echo '================================================' &&
+             echo ' '"
+
 volumes:
   mssql_data:
