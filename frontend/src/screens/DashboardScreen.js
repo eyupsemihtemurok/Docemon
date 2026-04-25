@@ -27,6 +27,25 @@ function getUserDisplayName(user) {
   return user.full_name || user.fullName || user.email || 'Kullanıcı';
 }
 
+function SectionHeader({ icon, title, description, isExpanded, onPress, iconBg }) {
+  return (
+    <Pressable style={styles.sectionHeader} onPress={onPress}>
+      <View style={[styles.sectionIconWrap, { backgroundColor: iconBg || '#dcfce7' }]}>
+        <Text style={styles.sectionIcon}>{icon}</Text>
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.sectionTitleEmbedded}>{title}</Text>
+        <Text style={styles.sectionDescription}>{description}</Text>
+      </View>
+      <View style={[styles.chevronWrap, isExpanded && styles.chevronWrapActive]}>
+        <Text style={[styles.accordionChevron, isExpanded && styles.accordionChevronActive]}>
+          {isExpanded ? '▲' : '▼'}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
+
 export default function DashboardScreen({ activeMenuItem, authToken, currentUser }) {
   const [friends, setFriends] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -41,6 +60,12 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
   const [rescueLoading, setRescueLoading] = useState(false);
   const [rescueMessage, setRescueMessage] = useState(null);
   const [isFabMenuVisible, setIsFabMenuVisible] = useState(false);
+
+  // Accordion States — all closed by default
+  const [isDisastersExpanded, setIsDisastersExpanded] = useState(false);
+  const [isFriendManagementExpanded, setIsFriendManagementExpanded] = useState(false);
+  const [isFriendsExpanded, setIsFriendsExpanded] = useState(false);
+  const [isRescueExpanded, setIsRescueExpanded] = useState(false);
 
   const loadDashboard = async () => {
     if (!authToken) {
@@ -77,9 +102,9 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
 
   const summaryCards = useMemo(
     () => [
-      { value: activeDisasters.length, label: 'aktif afet', tone: 'warning' },
-      { value: friends.length, label: 'yakın kişi', tone: 'success' },
-      { value: pendingRequests.length, label: 'bekleyen istek', tone: 'primary' },
+      { value: activeDisasters.length, label: 'Aktif Afet', tone: 'warning', icon: '🚨' },
+      { value: friends.length, label: 'Yakın Kişi', tone: 'success', icon: '👥' },
+      { value: pendingRequests.length, label: 'Bekleyen İstek', tone: 'primary', icon: '📨' },
     ],
     [activeDisasters.length, friends.length, pendingRequests.length]
   );
@@ -202,271 +227,360 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <View style={{ flex: 1, backgroundColor: '#eef9f0' }}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+
+        {/* ── HERO HEADER ── */}
         <View style={styles.heroCard}>
+          <View style={styles.heroGradientBand} />
           <View style={styles.heroTopRow}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.eyebrow}>AFET DESTEK PLATFORMU</Text>
-              <Text style={styles.title}>Canlı afet kontrol paneli</Text>
+              <View style={styles.eyebrowRow}>
+                <View style={styles.liveDot} />
+                <Text style={styles.eyebrow}>AFET DESTEK PLATFORMU</Text>
+              </View>
+              <Text style={styles.title}>Kontrol Paneli</Text>
               <Text style={styles.subtitle}>
-                {getUserDisplayName(currentUser)} için arkadaşlar, aktif afetler ve kurtarma akışları tek ekranda.
+                Hoş geldin, <Text style={styles.subtitleBold}>{getUserDisplayName(currentUser)}</Text> 👋
               </Text>
             </View>
-
-            <View style={styles.liveActionsRow}>
+            <View style={styles.heroBadgeCol}>
               <View style={styles.liveBadge}>
-                <View style={styles.liveDot} />
-                <Text style={styles.liveText}>Canlı izleme</Text>
+                <View style={styles.livePulse} />
+                <Text style={styles.liveText}>Canlı</Text>
               </View>
-              <Text style={styles.colorCaption}>{activeMenuItem || 'Dashboard görünümü'}</Text>
+              <Text style={styles.colorCaption}>{activeMenuItem || 'Dashboard'}</Text>
             </View>
           </View>
 
+          {/* Summary Stats */}
           <View style={styles.summaryGrid}>
             {summaryCards.map((item) => (
               <View key={item.label} style={[styles.summaryCard, styles[`summaryCard${item.tone}`]]}>
+                <Text style={styles.summaryCardIcon}>{item.icon}</Text>
                 <Text style={styles.summaryValue}>{item.value}</Text>
                 <Text style={styles.summaryLabel}>{item.label}</Text>
               </View>
             ))}
           </View>
-
-          <View style={styles.disasterPanel}>
-            <View style={styles.sectionHeader}>
-              <View>
-                <Text style={styles.sectionTitle}>Aktif Afetler</Text>
-                <Text style={styles.sectionDescription}>Backend’den gelen canlı afet listesi.</Text>
-              </View>
-            </View>
-
-            {dashboardLoading ? (
-              <View style={styles.loadingBox}>
-                <ActivityIndicator color="#0f766e" />
-                <Text style={styles.loadingText}>Veriler yükleniyor...</Text>
-              </View>
-            ) : activeDisasters.length > 0 ? (
-              <View style={styles.disasterList}>
-                {activeDisasters.slice(0, 3).map((disaster) => (
-                  <View key={disaster.id} style={styles.disasterCard}>
-                    <View style={styles.disasterCardHeader}>
-                      <Text style={styles.disasterTitle}>{formatDisasterLabel(disaster)}</Text>
-                      <View style={styles.disasterBadge}>
-                        <Text style={styles.disasterBadgeText}>CANLI</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.disasterLocation}>{formatDisasterLocation(disaster)}</Text>
-                    <Text style={styles.disasterDescription} numberOfLines={2}>
-                      {disaster.description || 'Açıklama bulunmuyor.'}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            ) : (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyStateTitle}>Aktif afet bulunmuyor</Text>
-                <Text style={styles.emptyStateText}>Yeni afet kaydı oluştuğunda burada canlı olarak görünecek.</Text>
-              </View>
-            )}
-          </View>
-
-          <View style={styles.requestPanel}>
-            <View style={styles.sectionHeader}>
-              <View>
-                <Text style={styles.sectionTitle}>Arkadaş Yönetimi</Text>
-                <Text style={styles.sectionDescription}>Yeni istek gönderin, gelen istekleri burada onaylayın veya reddedin.</Text>
-              </View>
-            </View>
-
-            <View style={styles.inlineForm}>
-              <TextInput
-                style={styles.receiverInput}
-                placeholder="E-posta veya kullanıcı ID"
-                placeholderTextColor="#64748b"
-                value={receiverIdentifier}
-                onChangeText={setReceiverIdentifier}
-                autoCapitalize="none"
-              />
-              <Pressable style={styles.sendButton} onPress={handleSendRequest} disabled={actionLoading}>
-                <Text style={styles.sendButtonText}>{actionLoading ? 'Bekleyin' : 'İstek Gönder'}</Text>
-              </Pressable>
-            </View>
-
-            {dashboardMessage && (
-              <View style={[styles.feedbackBox, dashboardMessage.type === 'error' ? styles.feedbackError : styles.feedbackSuccess]}>
-                <Text style={styles.feedbackText}>{dashboardMessage.text}</Text>
-              </View>
-            )}
-
-            <View style={styles.requestList}>
-              {pendingRequests.length > 0 ? (
-                pendingRequests.map((request) => {
-                  const isIncoming = request.direction === 'incoming';
-                  const displayName = isIncoming ? request.senderName : request.receiverName;
-
-                  return (
-                    <View key={request.requestId} style={styles.requestCard}>
-                      <View style={styles.requestCardTop}>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.requestName}>{displayName || 'Bilinmeyen kullanıcı'}</Text>
-                          <Text style={styles.requestMeta}>
-                            {isIncoming ? request.senderEmail : request.receiverEmail}
-                          </Text>
-                        </View>
-                        <View style={styles.requestStatusPill}>
-                          <Text style={styles.requestStatusText}>{isIncoming ? 'Gelen' : 'Giden'}</Text>
-                        </View>
-                      </View>
-
-                      <View style={styles.requestActions}>
-                        {isIncoming ? (
-                          <>
-                            <Pressable
-                              style={[styles.requestButton, styles.requestButtonPrimary]}
-                              onPress={() => handleRespondRequest(request.requestId, 'ACCEPTED')}
-                              disabled={actionLoading}
-                            >
-                              <Text style={styles.requestButtonPrimaryText}>Kabul Et</Text>
-                            </Pressable>
-                            <Pressable
-                              style={[styles.requestButton, styles.requestButtonSecondary]}
-                              onPress={() => handleRespondRequest(request.requestId, 'REJECTED')}
-                              disabled={actionLoading}
-                            >
-                              <Text style={styles.requestButtonSecondaryText}>Reddet</Text>
-                            </Pressable>
-                          </>
-                        ) : (
-                          <Text style={styles.requestPendingText}>Karşı tarafın yanıtı bekleniyor.</Text>
-                        )}
-                      </View>
-                    </View>
-                  );
-                })
-              ) : (
-                <View style={styles.emptyState}>
-                  <Text style={styles.emptyStateTitle}>Bekleyen arkadaş isteği yok</Text>
-                  <Text style={styles.emptyStateText}>Yeni bir istek gönderdiğinizde veya size bir istek geldiğinde burada görünecek.</Text>
-                </View>
-              )}
-            </View>
-          </View>
         </View>
 
+        {/* ── 1. AFETZEDEYİ TANILA ── */}
         <View style={styles.heroCard}>
-          <View style={styles.sectionHeader}>
-            <View>
-              <Text style={styles.sectionTitleEmbedded}>Yakınlarım</Text>
-              <Text style={styles.sectionDescription}>Arkadaşlarınızı ve acil durum kişilerinizi yönetebilirsiniz.</Text>
-            </View>
-          </View>
+          <SectionHeader
+            icon="🔍"
+            iconBg="#fef9c3"
+            title="Afetzede Tanıla"
+            description="Fotoğraf çek, sağlık ve konum bilgisi ekle; sistem eşleşme üretsin."
+            isExpanded={isRescueExpanded}
+            onPress={() => setIsRescueExpanded(!isRescueExpanded)}
+          />
 
-          {friends.length > 0 ? (
-            <View style={styles.peopleGrid}>
-              {friends.map((person) => (
-                <View key={person.friendshipId} style={styles.personCard}>
-                  <View style={styles.personPhotoWrap}>
-                    <View style={[styles.personPhoto, { backgroundColor: '#0f766e' }]}>
-                      <Text style={styles.personPhotoText}>{(person.fullName || person.name || '?').charAt(0).toUpperCase()}</Text>
-                    </View>
-                    <View style={[styles.badgeWrap, person.isEmergencyContact ? styles.badgeWrapActive : styles.badgeWrapInactive]}>
-                      <Text style={[styles.badgeText, person.isEmergencyContact ? styles.badgeTextActive : styles.badgeTextInactive]}>
-                        {person.isEmergencyContact ? 'Acil Kişi' : 'Arkadaş'}
+          {isRescueExpanded && (
+            <View style={styles.accordionBody}>
+              <View style={styles.rescuePanel}>
+                <Pressable style={styles.rescuePicker} onPress={handlePickImage}>
+                  <Text style={styles.rescuePickerIcon}>📸</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.rescuePickerTitle}>Kamerayı Aç</Text>
+                    <Text style={styles.rescuePickerText}>
+                      Afetzedeyi anlık olarak çekin ve eşleştirmeyi başlatın.
+                    </Text>
+                  </View>
+                  <Text style={styles.rescuePickerArrow}>›</Text>
+                </Pressable>
+
+                {selectedImage && (
+                  <View style={styles.rescuePreview}>
+                    <Image source={{ uri: selectedImage.uri }} style={styles.rescuePreviewImage} />
+                    <View style={styles.rescuePreviewFooter}>
+                      <Text style={styles.rescuePreviewIcon}>🖼️</Text>
+                      <Text style={styles.rescuePreviewText} numberOfLines={1}>
+                        {selectedImage.fileName || 'Fotoğraf seçildi'}
                       </Text>
                     </View>
                   </View>
+                )}
 
-                  <Text style={styles.personName}>{person.fullName || 'İsimsiz kişi'}</Text>
-                  <Text style={styles.personLocation}>{person.email || 'E-posta yok'}</Text>
-                  <Text style={styles.personStatus}>{person.safetyStatus || 'Durum bilgisi yok'}</Text>
-
-                  <View style={styles.friendCardFooter}>
-                    <Pressable
-                      style={[styles.friendActionButton, person.isEmergencyContact ? styles.friendActionButtonNeutral : styles.friendActionButtonPrimary]}
-                      onPress={() => handleToggleEmergency(person.friendshipId, Boolean(person.isEmergencyContact))}
-                      disabled={actionLoading}
-                    >
-                      <Text style={[styles.friendActionButtonText, person.isEmergencyContact && styles.friendActionButtonTextDark]}>
-                        {person.isEmergencyContact ? 'Acil Kişiden Çıkar' : 'Acil Kişi Yap'}
-                      </Text>
-                    </Pressable>
+                <View style={styles.inputGroup}>
+                  <View style={styles.inputLabelRow}>
+                    <Text style={styles.inputLabelIcon}>🏥</Text>
+                    <Text style={styles.inputLabel}>Sağlık Bilgisi</Text>
                   </View>
+                  <TextInput
+                    style={[styles.premiumInput, styles.premiumTextArea]}
+                    placeholder="Örn: Bilinci açık, hafif yaralı"
+                    placeholderTextColor="#94a3b8"
+                    multiline
+                    value={healthDetails}
+                    onChangeText={setHealthDetails}
+                  />
                 </View>
-              ))}
-            </View>
-          ) : (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateTitle}>Henüz yakın kişi eklenmedi</Text>
-              <Text style={styles.emptyStateText}>Üstteki arkadaş isteği alanından yeni kişi ekleyebilirsiniz.</Text>
+
+                <View style={styles.inputGroup}>
+                  <View style={styles.inputLabelRow}>
+                    <Text style={styles.inputLabelIcon}>📍</Text>
+                    <Text style={styles.inputLabel}>Konum Notu</Text>
+                  </View>
+                  <TextInput
+                    style={styles.premiumInput}
+                    placeholder="Örn: Elbistan merkez, okul binası"
+                    placeholderTextColor="#94a3b8"
+                    value={locationDetails}
+                    onChangeText={setLocationDetails}
+                  />
+                </View>
+
+                {rescueMessage && (
+                  <View style={[styles.feedbackBox, rescueMessage.type === 'error' ? styles.feedbackError : styles.feedbackSuccess]}>
+                    <Text style={styles.feedbackIcon}>{rescueMessage.type === 'error' ? '⚠️' : '✅'}</Text>
+                    <Text style={styles.feedbackText}>{rescueMessage.text}</Text>
+                  </View>
+                )}
+
+                <Pressable style={[styles.rescueButton, rescueLoading && styles.rescueButtonLoading]} onPress={handleRescueSubmit} disabled={rescueLoading}>
+                  {rescueLoading ? (
+                    <ActivityIndicator color="#ffffff" />
+                  ) : (
+                    <>
+                      <Text style={styles.rescueButtonIcon}>🚀</Text>
+                      <Text style={styles.rescueButtonText}>Tanımlamayı Başlat</Text>
+                    </>
+                  )}
+                </Pressable>
+              </View>
             </View>
           )}
         </View>
 
+        {/* ── 2. YAKINLARIM ── */}
         <View style={styles.heroCard}>
-          <View style={styles.sectionHeader}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.sectionTitleEmbedded}>Afetzede Tanıla</Text>
-              <Text style={styles.sectionDescription}>
-                Fotoğrafı seçin, sağlık ve konum notunu ekleyin; sistem eşleşme sonucu üretsin.
-              </Text>
-            </View>
-          </View>
+          <SectionHeader
+            icon="👥"
+            iconBg="#dcfce7"
+            title="Yakınlarım"
+            description="Arkadaşlarınız ve acil durum kişileriniz."
+            isExpanded={isFriendsExpanded}
+            onPress={() => setIsFriendsExpanded(!isFriendsExpanded)}
+          />
 
-          <View style={styles.rescuePanel}>
-            <Pressable style={styles.rescuePicker} onPress={handlePickImage}>
-              <Text style={styles.rescuePickerTitle}>Kamerayı aç</Text>
-              <Text style={styles.rescuePickerText}>
-                Afetzedeyi anlık olarak kameradan çekin ve eşleştirmeyi başlatın.
-              </Text>
-            </Pressable>
+          {isFriendsExpanded && (
+            <View style={styles.accordionBody}>
+              {friends.length > 0 ? (
+                <View style={styles.peopleGrid}>
+                  {friends.map((person) => (
+                    <View key={person.friendshipId} style={styles.personCard}>
+                      <View style={styles.personPhotoWrap}>
+                        <View style={[styles.personPhoto, { backgroundColor: person.isEmergencyContact ? '#dc2626' : '#0f766e' }]}>
+                          <Text style={styles.personPhotoText}>
+                            {(person.fullName || person.name || '?').charAt(0).toUpperCase()}
+                          </Text>
+                        </View>
+                        <View style={[styles.badgeWrap, person.isEmergencyContact ? styles.badgeWrapActive : styles.badgeWrapInactive]}>
+                          <Text style={styles.badgeIcon}>{person.isEmergencyContact ? '🚨' : '🤝'}</Text>
+                          <Text style={[styles.badgeText, person.isEmergencyContact ? styles.badgeTextActive : styles.badgeTextInactive]}>
+                            {person.isEmergencyContact ? 'Acil Kişi' : 'Arkadaş'}
+                          </Text>
+                        </View>
+                      </View>
 
-            {selectedImage && (
-              <View style={styles.rescuePreview}>
-                <Image source={{ uri: selectedImage.uri }} style={styles.rescuePreviewImage} />
-                <Text style={styles.rescuePreviewText} numberOfLines={1}>
-                  {selectedImage.fileName || selectedImage.uri}
-                </Text>
-              </View>
-            )}
+                      <Text style={styles.personName}>{person.fullName || 'İsimsiz kişi'}</Text>
+                      <View style={styles.personDetailRow}>
+                        <Text style={styles.personDetailIcon}>✉️</Text>
+                        <Text style={styles.personLocation}>{person.email || 'E-posta yok'}</Text>
+                      </View>
+                      <View style={styles.personDetailRow}>
+                        <Text style={styles.personDetailIcon}>🟢</Text>
+                        <Text style={styles.personStatus}>{person.safetyStatus || 'Durum bilgisi yok'}</Text>
+                      </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Sağlık bilgisi</Text>
-              <TextInput
-                style={[styles.premiumInput, styles.premiumTextArea]}
-                placeholder="Örn: Bilinci açık, hafif yaralı"
-                placeholderTextColor="#64748b"
-                multiline
-                value={healthDetails}
-                onChangeText={setHealthDetails}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Konum notu</Text>
-              <TextInput
-                style={styles.premiumInput}
-                placeholder="Örn: Elbistan merkez, okul binası"
-                placeholderTextColor="#64748b"
-                value={locationDetails}
-                onChangeText={setLocationDetails}
-              />
-            </View>
-
-            {rescueMessage && (
-              <View style={[styles.feedbackBox, rescueMessage.type === 'error' ? styles.feedbackError : styles.feedbackSuccess]}>
-                <Text style={styles.feedbackText}>{rescueMessage.text}</Text>
-              </View>
-            )}
-
-            <Pressable style={styles.rescueButton} onPress={handleRescueSubmit} disabled={rescueLoading}>
-              {rescueLoading ? (
-                <ActivityIndicator color="#ffffff" />
+                      <View style={styles.friendCardFooter}>
+                        <Pressable
+                          style={[styles.friendActionButton, person.isEmergencyContact ? styles.friendActionButtonNeutral : styles.friendActionButtonPrimary]}
+                          onPress={() => handleToggleEmergency(person.friendshipId, Boolean(person.isEmergencyContact))}
+                          disabled={actionLoading}
+                        >
+                          <Text style={styles.friendActionButtonIcon}>
+                            {person.isEmergencyContact ? '➖' : '🚨'}
+                          </Text>
+                          <Text style={[styles.friendActionButtonText, person.isEmergencyContact && styles.friendActionButtonTextDark]}>
+                            {person.isEmergencyContact ? 'Acil Kişiden Çıkar' : 'Acil Kişi Yap'}
+                          </Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  ))}
+                </View>
               ) : (
-                <Text style={styles.rescueButtonText}>Tanımlamayı Başlat</Text>
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateEmoji}>👤</Text>
+                  <Text style={styles.emptyStateTitle}>Henüz yakın kişi eklenmedi</Text>
+                  <Text style={styles.emptyStateText}>Arkadaş yönetimi bölümünden yeni kişi ekleyebilirsiniz.</Text>
+                </View>
               )}
-            </Pressable>
-          </View>
+            </View>
+          )}
         </View>
+
+        {/* ── 3. AKTİF AFETLER ── */}
+        <View style={styles.heroCard}>
+          <SectionHeader
+            icon="🚨"
+            iconBg="#fee2e2"
+            title="Aktif Afetler"
+            description="Backend'den gelen canlı afet listesi."
+            isExpanded={isDisastersExpanded}
+            onPress={() => setIsDisastersExpanded(!isDisastersExpanded)}
+          />
+
+          {isDisastersExpanded && (
+            <View style={styles.accordionBody}>
+              {dashboardLoading ? (
+                <View style={styles.loadingBox}>
+                  <ActivityIndicator color="#0f766e" size="small" />
+                  <Text style={styles.loadingText}>Veriler yükleniyor...</Text>
+                </View>
+              ) : activeDisasters.length > 0 ? (
+                <View style={styles.disasterList}>
+                  {activeDisasters.slice(0, 3).map((disaster) => (
+                    <View key={disaster.id} style={styles.disasterCard}>
+                      <View style={styles.disasterCardHeader}>
+                        <View style={styles.disasterIconWrap}>
+                          <Text style={styles.disasterIcon}>⚡</Text>
+                        </View>
+                        <Text style={styles.disasterTitle}>{formatDisasterLabel(disaster)}</Text>
+                        <View style={styles.disasterBadge}>
+                          <View style={styles.disasterBadgeDot} />
+                          <Text style={styles.disasterBadgeText}>CANLI</Text>
+                        </View>
+                      </View>
+                      <View style={styles.disasterLocationRow}>
+                        <Text style={styles.disasterLocationIcon}>📍</Text>
+                        <Text style={styles.disasterLocation}>{formatDisasterLocation(disaster)}</Text>
+                      </View>
+                      <Text style={styles.disasterDescription} numberOfLines={2}>
+                        {disaster.description || 'Açıklama bulunmuyor.'}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateEmoji}>✅</Text>
+                  <Text style={styles.emptyStateTitle}>Aktif afet bulunmuyor</Text>
+                  <Text style={styles.emptyStateText}>Yeni afet kaydı oluştuğunda burada canlı olarak görünecek.</Text>
+                </View>
+              )}
+            </View>
+          )}
+        </View>
+
+        {/* ── 4. ARKADAŞ YÖNETİMİ ── */}
+        <View style={styles.heroCard}>
+          <SectionHeader
+            icon="🤝"
+            iconBg="#dcfce7"
+            title="Arkadaş Yönetimi"
+            description="İstek gönder, gelen istekleri onayla veya reddet."
+            isExpanded={isFriendManagementExpanded}
+            onPress={() => setIsFriendManagementExpanded(!isFriendManagementExpanded)}
+          />
+
+          {isFriendManagementExpanded && (
+            <View style={styles.accordionBody}>
+              <View style={styles.inlineForm}>
+                <View style={styles.receiverInputWrap}>
+                  <Text style={styles.receiverInputIcon}>🔎</Text>
+                  <TextInput
+                    style={styles.receiverInput}
+                    placeholder="E-posta veya kullanıcı ID"
+                    placeholderTextColor="#94a3b8"
+                    value={receiverIdentifier}
+                    onChangeText={setReceiverIdentifier}
+                    autoCapitalize="none"
+                  />
+                </View>
+                <Pressable style={styles.sendButton} onPress={handleSendRequest} disabled={actionLoading}>
+                  <Text style={styles.sendButtonIcon}>➕</Text>
+                  <Text style={styles.sendButtonText}>{actionLoading ? 'Bekleyin' : 'İstek Gönder'}</Text>
+                </Pressable>
+              </View>
+
+              {dashboardMessage && (
+                <View style={[styles.feedbackBox, dashboardMessage.type === 'error' ? styles.feedbackError : styles.feedbackSuccess]}>
+                  <Text style={styles.feedbackIcon}>{dashboardMessage.type === 'error' ? '⚠️' : '✅'}</Text>
+                  <Text style={styles.feedbackText}>{dashboardMessage.text}</Text>
+                </View>
+              )}
+
+              <View style={styles.requestList}>
+                {pendingRequests.length > 0 ? (
+                  pendingRequests.map((request) => {
+                    const isIncoming = request.direction === 'incoming';
+                    const displayName = isIncoming ? request.senderName : request.receiverName;
+
+                    return (
+                      <View key={request.requestId} style={styles.requestCard}>
+                        <View style={styles.requestCardTop}>
+                          <View style={styles.requestAvatar}>
+                            <Text style={styles.requestAvatarText}>
+                              {(displayName || '?').charAt(0).toUpperCase()}
+                            </Text>
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.requestName}>{displayName || 'Bilinmeyen kullanıcı'}</Text>
+                            <Text style={styles.requestMeta}>
+                              {isIncoming ? request.senderEmail : request.receiverEmail}
+                            </Text>
+                          </View>
+                          <View style={[styles.requestStatusPill, isIncoming ? styles.requestStatusIncoming : styles.requestStatusOutgoing]}>
+                            <Text style={styles.requestStatusIcon}>{isIncoming ? '📥' : '📤'}</Text>
+                            <Text style={styles.requestStatusText}>{isIncoming ? 'Gelen' : 'Giden'}</Text>
+                          </View>
+                        </View>
+
+                        <View style={styles.requestActions}>
+                          {isIncoming ? (
+                            <>
+                              <Pressable
+                                style={[styles.requestButton, styles.requestButtonPrimary]}
+                                onPress={() => handleRespondRequest(request.requestId, 'ACCEPTED')}
+                                disabled={actionLoading}
+                              >
+                                <Text style={styles.requestButtonIcon}>✅</Text>
+                                <Text style={styles.requestButtonPrimaryText}>Kabul Et</Text>
+                              </Pressable>
+                              <Pressable
+                                style={[styles.requestButton, styles.requestButtonSecondary]}
+                                onPress={() => handleRespondRequest(request.requestId, 'REJECTED')}
+                                disabled={actionLoading}
+                              >
+                                <Text style={styles.requestButtonIcon}>❌</Text>
+                                <Text style={styles.requestButtonSecondaryText}>Reddet</Text>
+                              </Pressable>
+                            </>
+                          ) : (
+                            <View style={styles.requestPendingRow}>
+                              <Text style={styles.requestPendingIcon}>⏳</Text>
+                              <Text style={styles.requestPendingText}>Karşı tarafın yanıtı bekleniyor.</Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    );
+                  })
+                ) : (
+                  <View style={styles.emptyState}>
+                    <Text style={styles.emptyStateEmoji}>📭</Text>
+                    <Text style={styles.emptyStateTitle}>Bekleyen arkadaş isteği yok</Text>
+                    <Text style={styles.emptyStateText}>Yeni bir istek gönderdiğinizde veya geldiğinde burada görünecek.</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
+        </View>
+
       </ScrollView>
 
       {isFabMenuVisible && (

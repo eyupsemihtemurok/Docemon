@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> } 
  */
-exports.seed = async function(knex) {
+exports.seed = async function (knex) {
   const passwordHash = await bcrypt.hash('Pass123!', 12);
 
   // 1. ROLES
