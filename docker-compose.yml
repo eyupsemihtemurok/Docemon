@@ -31,9 +31,23 @@ services:
       - DB_NAME=hackathon26
       - NODE_ENV=production
       - HASH_SALT=hackathon26_secret_salt_key
+      - JWT_SECRET=hackathon26_super_secret_jwt_key
     depends_on:
       hackathon26-sql:
         condition: service_healthy
+    restart: always
+
+  hackathon26-faceservice:
+    build:
+      context: ./face-service
+      dockerfile: Dockerfile
+    container_name: hackathon26-faceservice
+    ports:
+      - "8000:8000"
+    environment:
+      - DEEPFACE_HOME=/app/.deepface
+    volumes:
+      - ./face-service/.deepface:/app/.deepface
     restart: always
 
   hackathon26-frontend:
