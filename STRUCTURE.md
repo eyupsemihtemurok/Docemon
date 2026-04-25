@@ -6,7 +6,7 @@
 
 ```text
 hackathon26/
-├── backend/                # NestJS tabanlı API servisi
+├── backend/                # Express.js tabanlı API servisi
 │   ├── Domain/             # İş mantığı, Entity'ler, Interface'ler
 │   ├── Application/        # Use Case'ler, DTO'lar, Mapper'lar
 │   ├── Infrastructure/     # DB erişimi, Dış servis entegrasyonları
@@ -28,7 +28,7 @@ Clean Architecture katmanlarını içerir.
 - **Domain:** Projenin kalbidir. Hiçbir dış kütüphaneye veya katmana bağımlı değildir.
 - **Application:** Domain katmanını kullanarak iş süreçlerini yönetir.
 - **Infrastructure:** Veritabanı (MSSQL) bağlantıları ve harici API çağrılarını yönetir.
-- **Presentation:** İstekleri karşılar ve yanıtları döner (NestJS Controllerları).
+- **Presentation:** İstekleri karşılar ve yanıtları döner (Express.js Router ve Controllerları).
 
 ### Frontend (`/frontend`)
 Expo kullanılarak geliştirilen ortak kod tabanıdır. Aynı kod üzerinden iOS, Android ve Web çıktıları üretilir.

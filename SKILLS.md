@@ -24,7 +24,7 @@ Bu döküman, `hackathon26` projesinde uyulması gereken yazılım geliştirme p
 ## 🛠 Teknik Standartlar
 
 - **Hata Yönetimi (Error Handling):** Global exception filter'lar kullanılmalı. Kullanıcıya anlamlı hata mesajları dönülmeli.
-- **Validasyon:** İstek verileri `class-validator` gibi kütüphaneler ile mutlaka doğrulanmalı.
+- **Validasyon:** İstek verileri uygun validator kütüphaneleri (Joi, Yup, Express-Validator vb.) ile mutlaka doğrulanmalı.
 - **Loglama:** Kritik süreçler ve hatalar loglanmalı.
 - **Git Standartları:** Anlamlı commit mesajları (Conventional Commits) kullanılmalı.
 

@@ -1,23 +1,37 @@
-const http = require('http');
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
 
+const app = express();
 const PORT = process.env.PORT || 3000;
 
-const server = http.createServer((req, res) => {
-  if (req.url === '/health') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', service: 'backend' }));
-    return;
-  }
+// Middleware
+app.use(helmet()); // Güvenlik başlıkları
+app.use(cors()); // Cross-Origin Resource Sharing
+app.use(express.json()); // JSON gövde analizi
+app.use(morgan('dev')); // İstek günlüğü (Logging)
 
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(
-    JSON.stringify({
-      message: 'hackathon26 backend placeholder is running',
-      path: req.url,
-    })
-  );
+// Health Check Endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    service: 'hackathon26-backend',
+    timestamp: new Date().toISOString()
+  });
 });
 
-server.listen(PORT, () => {
+// Root Endpoint Placeholder
+app.get('/', (req, res) => {
+  res.json({
+    message: 'hackathon26 Express.js backend is running',
+    version: '0.1.0'
+  });
+});
+
+// Sunucuyu Başlat
+app.listen(PORT, () => {
   console.log(`Backend listening on port ${PORT}`);
 });
+
