@@ -4,7 +4,7 @@ Bu proje, modern web ve mobil teknolojilerini bir araya getiren, Clean Architect
 
 ## 🚀 Teknolojiler
 
-- **Backend:** Node.js (NestJS)
+- **Backend:** Node.js (Express.js)
 - **Frontend & Mobil:** React Native (Expo - Web desteği ile)
 - **Veritabanı:** MSSQL 2022
 - **Konteynerizasyon:** Docker & Docker Compose

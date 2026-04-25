@@ -7,7 +7,7 @@ import useWebRouter from '../hooks/useWebRouter';
 import DashboardScreen from '../screens/DashboardScreen';
 import HomeScreen from '../screens/HomeScreen';
 import LoginPage from '../screens/LoginPage';
-import RegisterPage from '../screens/RegisterPage';
+import ProfileScreen from '../screens/ProfileScreen';
 
 export default function AppRoot() {
   const { path, navigate, replace } = useWebRouter();
@@ -36,11 +36,7 @@ export default function AppRoot() {
     }
 
     if (path === ROUTES.LOGIN) {
-      return <LoginPage onLogin={handleLogin} navigate={navigate} />;
-    }
-
-    if (path === ROUTES.REGISTER) {
-      return <RegisterPage onRegister={() => navigate(ROUTES.LOGIN)} navigate={navigate} />;
+      return <LoginPage onLogin={handleLogin} />;
     }
 
     if (path === ROUTES.DASHBOARD) {
@@ -53,7 +49,7 @@ export default function AppRoot() {
         <View style={styles.dashboardWrapper}>
           <DashboardNavbar
             userName="Mete"
-            onToggleMenu={() => setIsMenuOpen((prev) => !prev)}
+            onProfilePress={() => navigate(ROUTES.PROFILE)}
           />
           <DashboardScreen activeMenuItem={activeMenuItemLabel} />
           <DashboardSidePanel
@@ -65,6 +61,14 @@ export default function AppRoot() {
           />
         </View>
       );
+    }
+
+    if (path === ROUTES.PROFILE) {
+      if (!isAuthenticated) {
+        replace(ROUTES.LOGIN);
+        return null;
+      }
+      return <ProfileScreen navigate={navigate} />;
     }
 
     replace(ROUTES.HOME);

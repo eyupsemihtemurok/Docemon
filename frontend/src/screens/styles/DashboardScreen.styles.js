@@ -9,6 +9,9 @@ export default StyleSheet.create({
     padding: 18,
     gap: 14,
     paddingBottom: 40,
+    maxWidth: 800,
+    width: '100%',
+    alignSelf: 'center',
   },
   heroCard: {
     borderRadius: 24,
@@ -24,7 +27,7 @@ export default StyleSheet.create({
   },
   eyebrow: {
     color: '#15803d',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1.2,
     textTransform: 'uppercase',
@@ -46,14 +49,14 @@ export default StyleSheet.create({
   },
   panelContent: {
     color: '#475569',
-    fontSize: 13,
+    fontSize: 14,
     marginTop: 10,
     lineHeight: 20,
   },
 
   title: {
     color: '#052e16',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '900',
     lineHeight: 28,
   },
@@ -65,9 +68,15 @@ export default StyleSheet.create({
   },
   sectionTitleEmbedded: {
     color: '#052e16',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '900',
-    marginBottom: 12,
+    marginBottom: 8,
+  },
+  sectionDescription: {
+    color: '#475569',
+    fontSize: 14,
+    lineHeight: 18,
+    marginTop: 4,
   },
   categoryTitle: {
     fontSize: 14,
@@ -144,7 +153,7 @@ export default StyleSheet.create({
   statLabel: {
     color: '#4b5563',
     marginTop: 2,
-    fontSize: 12,
+    fontSize: 11,
   },
   detailsGrid: {
     backgroundColor: '#f8fafc',
@@ -162,7 +171,7 @@ export default StyleSheet.create({
   },
   detailLabel: {
     color: '#64748b',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -170,7 +179,7 @@ export default StyleSheet.create({
   },
   detailValue: {
     color: '#1e293b',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
   },
   sectionHeader: {
@@ -242,7 +251,7 @@ export default StyleSheet.create({
   },
   personName: {
     color: '#052e16',
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '900',
   },
   personLocation: {
@@ -254,6 +263,7 @@ export default StyleSheet.create({
   personStatus: {
     color: '#475569',
     marginTop: 8,
+    fontSize: 14,
     lineHeight: 20,
   },
   colorCaptionRow: {

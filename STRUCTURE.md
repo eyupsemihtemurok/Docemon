@@ -6,33 +6,66 @@
 
 ```text
 hackathon26/
-├── backend/                # NestJS tabanlı API servisi
-│   ├── Domain/             # İş mantığı, Entity'ler, Interface'ler
-│   ├── Application/        # Use Case'ler, DTO'lar, Mapper'lar
-│   ├── Infrastructure/     # DB erişimi, Dış servis entegrasyonları
-│   ├── Presentation/       # Controller'lar, API Endpoint'leri
-│   └── Dockerfile          # Backend servis paketi
-├── frontend/               # React Native (Expo) Uygulaması
-│   ├── src/                # Kaynak kodlar
-│   └── Dockerfile          # Frontend/Web servis paketi
-├── README.md               # Genel proje dökümanı
-├── STRUCTURE.md            # Klasör yapısı açıklaması
-├── SKILLS.md               # Geliştirme kuralları ve prensipler
-└── docker-compose.yml      # Tüm servislerin (SQL, BE, FE) orkestrasyonu
+├── backend/                        # Express.js tabanlı API servisi
+│   ├── Application/                # Use Case'ler, DTO'lar, İş akışları
+│   │   └── README.md
+│   ├── Domain/                     # İş mantığı, Entity'ler, Interface'ler
+│   │   ├── Entities/               # Saf JavaScript sınıf modelleri (POJO)
+│   │   │   ├── Friend.js
+│   │   │   ├── Location.js
+│   │   │   ├── Log.js
+│   │   │   ├── Notification.js
+│   │   │   ├── Role.js
+│   │   │   ├── User.js
+│   │   │   └── UserRole.js
+│   │   └── README.md
+│   ├── Infrastructure/             # DB erişimi, Dış servis entegrasyonları
+│   │   ├── Persistence/            # DB bağlantı ve Migration dosyaları
+│   │   │   ├── Migrations/         # Veritabanı şema versiyonları
+│   │   │   │   └── 20260425_initial_schema.js
+│   │   │   └── init-db.js          # Veritabanı başlatma betiği
+│   │   ├── Security/               # Şifreleme ve Güvenlik servisleri
+│   │   │   └── SecurityService.js
+│   │   └── README.md
+│   ├── Presentation/               # API Endpoint'leri, Middleware'ler
+│   │   └── README.md
+│   ├── .env.example                # Örnek çevre değişkenleri
+│   ├── Dockerfile                  # Backend Docker yapılandırması
+│   ├── knexfile.js                 # Knex.js veritabanı konfigürasyonu
+│   ├── package.json                # Bağımlılıklar ve scriptler
+│   └── server.js                   # Uygulama giriş noktası
+├── frontend/                       # React Native (Expo) Uygulaması
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── README.md
+│   └── server.js
+├── docker-compose.yml              # Tüm sistemin orkestrasyonu
+├── README.md                       # Genel dökümantasyon
+├── REQUIREMENTS.md                 # Gereksinimler listesi
+├── SKILLS.md                       # Yazılım standartları
+└── STRUCTURE.md                    # Bu dosya
 ```
 
-## Detaylı Açıklamalar
+## 🛠 Katmanlı Yönetim ve Standartlar
 
-### Backend (`/backend`)
-Clean Architecture katmanlarını içerir.
-- **Domain:** Projenin kalbidir. Hiçbir dış kütüphaneye veya katmana bağımlı değildir.
-- **Application:** Domain katmanını kullanarak iş süreçlerini yönetir.
-- **Infrastructure:** Veritabanı (MSSQL) bağlantıları ve harici API çağrılarını yönetir.
-- **Presentation:** İstekleri karşılar ve yanıtları döner (NestJS Controllerları).
+### 1. Migrasyon Yönetimi (Kolay Ekleme/Silme/Geri Alma)
 
-### Frontend (`/frontend`)
-Expo kullanılarak geliştirilen ortak kod tabanıdır. Aynı kod üzerinden iOS, Android ve Web çıktıları üretilir.
+Proje içindeki veritabanı değişikliklerini yönetmek için aşağıdaki komutlar `backend` klasörü içinde kullanılır:
 
-### Altyapı
-- **MSSQL 2022:** Veri depolama için Docker üzerinde çalışır.
-- **Docker Compose:** Tüm sistemin tek tuşla ayağa kalkmasını sağlar.
+- **Yeni Migration Ekleme:** `npm run migrate:make [isim]`
+  - *Bu komut Infrastructure/Persistence/Migrations içinde yeni bir dosya oluşturur.*
+- **Geri Alma (Rollback):** `npm run migrate:rollback`
+  - *En son yapılan değişikliği veritabanından siler.*
+- **Güncelleme:** `npm run migrate:latest`
+  - *Tüm bekleyen değişiklikleri veritabanına uygular.*
+
+### 2. Backend Mimari Detayları
+
+- **Domain:** Projenin en iç katmanıdır. `Entities` içindeki dosyalar veritabanındaki tabloların birebir kod karşılığıdır.
+- **Application:** Uygulama iş mantığı burada döner. Domain nesnelerini kullanır.
+- **Infrastructure:** Veritabanı işlemlerinin teknik detayları (Knex/MSSQL) ve güvenlik servisleri burada yer alır.
+- **Presentation:** Express.js rotaları ve kontrolleri burada tanımlanır.
+
+### 3. Frontend Mimari Detayları
+
+Expo tabanlı yapı ile hem Web hem de Mobil çıktıların tek bir kod tabanından yönetilmesi sağlanır.

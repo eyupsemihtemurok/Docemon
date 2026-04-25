@@ -11,11 +11,11 @@ En hızlı kurulum için sadece aşağıdaki araçlara ihtiyacınız vardır:
 Projeyi Docker olmadan veya geliştirme modunda çalıştırmak isterseniz:
 
 ### Genel
+
 - **Node.js:** v20.x veya üzeri
 - **npm:** v10.x veya üzeri
 
-### Backend (NestJS)
-- **Nest CLI:** `npm i -g @nestjs/cli`
+### Backend (Express.js)
 - **MSSQL Server:** (Docker üzerinden `hackathon26-sql` konteynerini kullanabilirsiniz)
 
 ### Frontend & Mobil (Expo)
