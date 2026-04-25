@@ -1,25 +1,28 @@
-# hackathon26 - Frontend & Mobile
+# hackathon26 Frontend
 
-Bu klasör, Expo (React Native) kullanılarak geliştirilen ve hem Web hem de Mobil platformlarda çalışabilen kullanıcı arayüzü projesini içerir.
+Bu klasör, Expo tabanlı React Native arayüzünü içerir ve Docker içinde de web olarak çalışır.
 
-## 🚀 Öne Çıkan Özellikler
-- **Cross-Platform:** iOS, Android ve Web için tek kod tabanı.
-- **Expo Router:** Dosya tabanlı yönlendirme (Routing) mekanizması.
-- **Responsive Design:** Web ve mobil ekranlarına uyumlu tasarım.
+## Özellikler
+- Tek kod tabanından web görünümü
+- Ana sayfa, hizmetler, randevular ve profil bölümleri
+- Docker için optimize edilmiş build context
 
-## 📁 Klasör Yapısı
-- **src/components:** Yeniden kullanılabilir UI bileşenleri.
-- **src/app:** Sayfa yapıları ve yönlendirmeler (Expo Router).
-- **src/services:** Backend API çağrıları.
-- **src/hooks:** Özel React hook'ları.
-- **src/constants:** Renkler, yazı tipleri ve sabit değerler.
+## Klasör Yapısı
+- `App.js`: Uygulamanın ana kabuğu ve gezinme yapısı
+- `pages/`: Ekran içerikleri
+- `Dockerfile`: Frontend image tanımı
 
-## 🛠 Çalıştırma
-Projeyi web ortamında önizlemek için:
+## Çalıştırma
+Yerelde:
 ```bash
-npx expo start --web
+npm install
+npm run start
 ```
-Docker üzerinde çalıştırmak için:
+
+Docker ile:
 ```bash
-docker-compose up hackathon26-frontend
+docker compose up -d --build hackathon26-frontend
 ```
+
+Web adresi:
+`http://localhost:19006`
