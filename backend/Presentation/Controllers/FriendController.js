@@ -1,8 +1,10 @@
 const NetworkService = require('../../Application/Services/NetworkService');
 const FriendRepository = require('../../Infrastructure/Persistence/Repositories/FriendRepository');
+const UserRepository = require('../../Infrastructure/Persistence/Repositories/UserRepository');
 
 const friendRepository = new FriendRepository();
-const networkService = new NetworkService(friendRepository);
+const userRepository = new UserRepository();
+const networkService = new NetworkService(friendRepository, userRepository);
 
 class FriendController {
     /**
@@ -49,11 +51,32 @@ class FriendController {
      */
     static async sendRequest(req, res) {
         try {
-            const { receiverId } = req.body;
-            const requestId = await networkService.createRequest(req.user.id, receiverId);
+            const receiverIdentifier = (req.body.receiverIdentifier || req.body.receiverId || req.body.receiverEmail || '').trim();
+            const requestId = await networkService.sendFriendRequest(req.user.id, receiverIdentifier);
             res.status(201).json({ message: 'Friend request sent.', requestId });
         } catch (err) {
             res.status(400).json({ error: err.message });
+        }
+    }
+
+    /**
+     * @swagger
+     * /api/friends/requests:
+     *   get:
+     *     summary: Get pending friend requests for current user
+     *     tags: [Network]
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: Pending friend requests
+     */
+    static async getRequests(req, res) {
+        try {
+            const requests = await networkService.getPendingRequests(req.user.id);
+            res.json(requests);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
         }
     }
 
