@@ -9,6 +9,7 @@ import DisasterMapScreen from '../screens/DisasterMapScreen';
 import FaceMatchScreen from '../screens/FaceMatchScreen';
 import HomeScreen from '../screens/HomeScreen';
 import LoginPage from '../screens/LoginPage';
+import NotificationsScreen from '../screens/NotificationsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { fetchCurrentUser } from '../services/authApi';
 import { clearAuthToken, getAuthToken, setAuthToken } from '../services/authStorage';
@@ -133,6 +134,15 @@ export default function AppRoot() {
       return <ProfileScreen navigate={navigate} />;
     }
 
+    if (path === ROUTES.NOTIFICATIONS) {
+      if (!isAuthReady) return null;
+      if (!isAuthenticated) {
+        replace(ROUTES.LOGIN);
+        return null;
+      }
+      return <NotificationsScreen authToken={authToken} />;
+    }
+
     replace(ROUTES.HOME);
     return null;
   };
@@ -143,6 +153,7 @@ export default function AppRoot() {
         <DashboardNavbar
           userName={currentUser?.full_name || currentUser?.fullName || currentUser?.email || 'Kullanıcı'}
           onProfilePress={() => navigate(ROUTES.PROFILE)}
+          authToken={authToken}
         />
       )}
       {renderPage()}
