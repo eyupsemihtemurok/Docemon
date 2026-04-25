@@ -1,15 +1,10 @@
-/**
- * @file Role.js
- * @description Domain entity for Role
- */
-
 class Role {
     constructor({
-        id = null,
-        ad
+        id,
+        name
     } = {}) {
         this.id = id;
-        this.ad = ad;
+        this.name = name;
     }
 }
 

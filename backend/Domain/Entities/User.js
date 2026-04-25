@@ -1,32 +1,32 @@
 class User {
     constructor({
         id,
-        tc,
-        ad_soyad,
+        nationalId,
+        fullName,
         email,
-        sifre,
-        kan_grubu,
-        kronik_hastaliklar,
-        dogum_tarihi,
-        telefon,
-        yuz_verisi,
-        aktiflik,
-        kayit_tarihi,
-        guncelleme_tarihi
-    }) {
+        password,
+        bloodType,
+        chronicDiseases,
+        birthDate,
+        phone,
+        faceData,
+        isActive = true,
+        createdAt = new Date(),
+        updatedAt = new Date()
+    } = {}) {
         this.id = id;
-        this.tc = tc;
-        this.ad_soyad = ad_soyad;
+        this.nationalId = nationalId;
+        this.fullName = fullName;
         this.email = email;
-        this.sifre = sifre;
-        this.kan_grubu = kan_grubu;
-        this.kronik_hastaliklar = kronik_hastaliklar;
-        this.dogum_tarihi = dogum_tarihi;
-        this.telefon = telefon;
-        this.yuz_verisi = yuz_verisi;
-        this.aktiflik = aktiflik;
-        this.kayit_tarihi = kayit_tarihi;
-        this.guncelleme_tarihi = guncelleme_tarihi;
+        this.password = password;
+        this.bloodType = bloodType;
+        this.chronicDiseases = chronicDiseases;
+        this.birthDate = birthDate;
+        this.phone = phone;
+        this.faceData = faceData;
+        this.isActive = isActive;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 }
 

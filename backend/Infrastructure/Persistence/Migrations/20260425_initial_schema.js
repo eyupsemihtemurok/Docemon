@@ -3,69 +3,87 @@
  * @returns { Promise<void> }
  */
 exports.up = async function(knex) {
-    // 1. USER TABLOSU
+    // 1. USER TABLE
     await knex.schema.createTable('user', (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
-        table.string('tc', 64).unique().notNullable();
-        table.string('ad_soyad', 100).notNullable();
+        table.string('national_id', 64).unique().notNullable();
+        table.string('full_name', 100).notNullable();
         table.string('email', 100).unique().notNullable();
-        table.string('sifre', 255).notNullable();
-        table.text('yuz_verisi');
-        table.boolean('aktiflik').defaultTo(true);
-        table.datetime('kayit_tarihi', { precision: 2 }).defaultTo(knex.fn.now());
-        table.datetime('guncelleme_tarihi', { precision: 2 }).defaultTo(knex.fn.now());
+        table.string('password', 255).notNullable();
+        table.string('blood_type', 10);
+        table.text('chronic_diseases');
+        table.date('birth_date');
+        table.string('phone', 20);
+        table.text('face_data');
+        table.boolean('is_active').defaultTo(true);
+        table.datetime('created_at', { precision: 2 }).defaultTo(knex.fn.now());
+        table.datetime('updated_at', { precision: 2 }).defaultTo(knex.fn.now());
     });
 
-    // 2. ROL TABLOSU
-    await knex.schema.createTable('rol', (table) => {
+    // 2. ROLE TABLE
+    await knex.schema.createTable('role', (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
-        table.string('ad', 50).unique().notNullable();
+        table.string('name', 50).unique().notNullable();
     });
 
-    // 3. USER_ROL TABLOSU
-    await knex.schema.createTable('user_rol', (table) => {
+    // 3. USER_ROLE TABLE
+    await knex.schema.createTable('user_role', (table) => {
         table.uuid('user_id').references('id').inTable('user').onDelete('CASCADE');
-        table.uuid('rol_id').references('id').inTable('rol').onDelete('CASCADE');
-        table.primary(['user_id', 'rol_id']);
+        table.uuid('role_id').references('id').inTable('role').onDelete('CASCADE');
+        table.primary(['user_id', 'role_id']);
     });
 
-    // 4. KONUM TABLOSU
-    await knex.schema.createTable('konum', (table) => {
+    // 4. DISASTER TABLE
+    await knex.schema.createTable('disaster', (table) => {
+        table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
+        table.string('type', 50).notNullable(); // Earthquake, Flood, etc.
+        table.string('severity', 20);           // Magnitude or Scale
+        table.string('location_name', 100);
+        table.decimal('latitude', 10, 8);
+        table.decimal('longitude', 11, 8);
+        table.text('description');
+        table.datetime('start_time', { precision: 2 }).defaultTo(knex.fn.now());
+        table.datetime('end_time', { precision: 2 });
+        table.boolean('is_active').defaultTo(true);
+    });
+
+    // 5. LOCATION TABLE
+    await knex.schema.createTable('location', (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
         table.uuid('user_id').references('id').inTable('user').onDelete('CASCADE');
-        table.decimal('enlem', 10, 8);
-        table.decimal('boylam', 11, 8);
-        table.string('sehir', 50);
-        table.datetime('tarih', { precision: 2 }).defaultTo(knex.fn.now());
+        table.decimal('latitude', 10, 8);
+        table.decimal('longitude', 11, 8);
+        table.string('city', 50);
+        table.datetime('created_at', { precision: 2 }).defaultTo(knex.fn.now());
     });
 
-    // 5. LOG TABLOSU
-    await knex.schema.createTable('log', (table) => {
+    // 6. AUDIT_LOG TABLE
+    await knex.schema.createTable('audit_log', (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
         table.uuid('user_id').references('id').inTable('user').onDelete('SET NULL');
-        table.string('olay_tipi', 100).notNullable();
-        table.text('detay');
-        table.datetime('tarih', { precision: 2 }).defaultTo(knex.fn.now());
+        table.string('event_type', 100).notNullable();
+        table.text('details');
+        table.datetime('created_at', { precision: 2 }).defaultTo(knex.fn.now());
     });
 
-    // 6. BİLDİRİM TABLOSU
-    await knex.schema.createTable('bildirim', (table) => {
+    // 7. NOTIFICATION TABLE
+    await knex.schema.createTable('notification', (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
         table.uuid('user_id').references('id').inTable('user').onDelete('CASCADE');
-        table.string('baslik', 100).notNullable();
-        table.string('mesaj', 500).notNullable();
-        table.string('tip', 50).notNullable();
-        table.boolean('okundu').defaultTo(false);
-        table.datetime('tarih', { precision: 2 }).defaultTo(knex.fn.now());
+        table.string('title', 100).notNullable();
+        table.string('message', 500).notNullable();
+        table.string('type', 50).notNullable();
+        table.boolean('is_read').defaultTo(false);
+        table.datetime('created_at', { precision: 2 }).defaultTo(knex.fn.now());
     });
 
-    // 7. ARKADAŞ TABLOSU
-    await knex.schema.createTable('arkadas', (table) => {
+    // 8. FRIEND TABLE
+    await knex.schema.createTable('friend', (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
-        table.uuid('istek_atan_id').references('id').inTable('user').onDelete('NO ACTION');
-        table.uuid('istek_alan_id').references('id').inTable('user').onDelete('NO ACTION');
-        table.string('durum', 20).defaultTo('BEKLIYOR');
-        table.datetime('tarih', { precision: 2 }).defaultTo(knex.fn.now());
+        table.uuid('sender_id').references('id').inTable('user').onDelete('NO ACTION');
+        table.uuid('receiver_id').references('id').inTable('user').onDelete('NO ACTION');
+        table.string('status', 20).defaultTo('PENDING');
+        table.datetime('created_at', { precision: 2 }).defaultTo(knex.fn.now());
     });
 };
 
@@ -74,12 +92,14 @@ exports.up = async function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function(knex) {
-    await knex.schema.dropTableIfExists('arkadas');
-    await knex.schema.dropTableIfExists('bildirim');
-    await knex.schema.dropTableIfExists('log');
-    await knex.schema.dropTableIfExists('konum');
-    await knex.schema.dropTableIfExists('user_rol');
-    await knex.schema.dropTableIfExists('rol');
+    await knex.schema.dropTableIfExists('friend');
+    await knex.schema.dropTableIfExists('notification');
+    await knex.schema.dropTableIfExists('audit_log');
+    await knex.schema.dropTableIfExists('location');
+    await knex.schema.dropTableIfExists('disaster');
+    await knex.schema.dropTableIfExists('user_role');
+    await knex.schema.dropTableIfExists('role');
     await knex.schema.dropTableIfExists('user');
 };
+
 

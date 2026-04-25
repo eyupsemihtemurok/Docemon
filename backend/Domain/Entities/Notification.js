@@ -1,25 +1,20 @@
-/**
- * @file Notification.js (Bildirim)
- * @description Domain entity for Notifications
- */
-
 class Notification {
     constructor({
-        id = null,
-        user_id,
-        baslik,
-        mesaj,
-        tip,
-        okundu = false,
-        tarih = new Date()
+        id,
+        userId,
+        title,
+        message,
+        type,
+        isRead = false,
+        createdAt = new Date()
     } = {}) {
         this.id = id;
-        this.user_id = user_id;
-        this.baslik = baslik;
-        this.mesaj = mesaj;
-        this.tip = tip;
-        this.okundu = okundu;
-        this.tarih = tarih;
+        this.userId = userId;
+        this.title = title;
+        this.message = message;
+        this.type = type;
+        this.isRead = isRead;
+        this.createdAt = createdAt;
     }
 }
 
