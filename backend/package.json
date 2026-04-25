@@ -4,13 +4,15 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "start:prod": "npm run migrate:latest && node server.js",
+    "db:init": "node Infrastructure/Persistence/init-db.js",
+    "start:prod": "npm run db:init && npm run migrate:latest && node server.js",
     "start:dev": "nodemon server.js",
     "migrate:make": "knex migrate:make",
     "migrate:latest": "knex migrate:latest",
     "migrate:rollback": "knex migrate:rollback"
   },
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "cors": "^2.8.5",
