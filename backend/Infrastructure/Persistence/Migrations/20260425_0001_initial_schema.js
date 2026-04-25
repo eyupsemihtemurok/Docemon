@@ -3,8 +3,15 @@
  * @returns { Promise<void> }
  */
 exports.up = async function(knex) {
+    const ensureTable = async (tableName, builder) => {
+        const exists = await knex.schema.hasTable(tableName);
+        if (!exists) {
+            await knex.schema.createTable(tableName, builder);
+        }
+    };
+
     // 1. USER TABLE
-    await knex.schema.createTable('user', (table) => {
+    await ensureTable('user', (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
         table.string('full_name', 100).notNullable();
         table.string('email', 100).unique().notNullable();
@@ -20,20 +27,20 @@ exports.up = async function(knex) {
     });
 
     // 2. ROLE TABLE
-    await knex.schema.createTable('role', (table) => {
+    await ensureTable('role', (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
         table.string('name', 50).unique().notNullable();
     });
 
     // 3. USER_ROLE TABLE
-    await knex.schema.createTable('user_role', (table) => {
+    await ensureTable('user_role', (table) => {
         table.uuid('user_id').references('id').inTable('user').onDelete('CASCADE');
         table.uuid('role_id').references('id').inTable('role').onDelete('CASCADE');
         table.primary(['user_id', 'role_id']);
     });
 
     // 4. DISASTER TABLE
-    await knex.schema.createTable('disaster', (table) => {
+    await ensureTable('disaster', (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
         table.string('type', 50).notNullable(); // Earthquake, Flood, etc.
         table.string('severity', 20);           // Magnitude or Scale
@@ -47,7 +54,7 @@ exports.up = async function(knex) {
     });
 
     // 5. LOCATION TABLE
-    await knex.schema.createTable('location', (table) => {
+    await ensureTable('location', (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
         table.uuid('user_id').references('id').inTable('user').onDelete('CASCADE');
         table.decimal('latitude', 10, 8);
@@ -57,7 +64,7 @@ exports.up = async function(knex) {
     });
 
     // 6. AUDIT_LOG TABLE
-    await knex.schema.createTable('audit_log', (table) => {
+    await ensureTable('audit_log', (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
         table.uuid('user_id').references('id').inTable('user').onDelete('SET NULL');
         table.string('event_type', 100).notNullable();
@@ -66,7 +73,7 @@ exports.up = async function(knex) {
     });
 
     // 7. NOTIFICATION TABLE
-    await knex.schema.createTable('notification', (table) => {
+    await ensureTable('notification', (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
         table.uuid('user_id').references('id').inTable('user').onDelete('CASCADE');
         table.string('title', 100).notNullable();
@@ -77,7 +84,7 @@ exports.up = async function(knex) {
     });
 
     // 8. FRIEND TABLE
-    await knex.schema.createTable('friend', (table) => {
+    await ensureTable('friend', (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
         table.uuid('sender_id').references('id').inTable('user').onDelete('NO ACTION');
         table.uuid('receiver_id').references('id').inTable('user').onDelete('NO ACTION');

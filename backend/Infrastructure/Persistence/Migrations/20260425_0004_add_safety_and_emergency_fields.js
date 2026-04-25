@@ -3,15 +3,25 @@
  * @returns { Promise<void> }
  */
 exports.up = async function(knex) {
-    // Add safety_status to user table
-    await knex.schema.alterTable('user', (table) => {
-        table.string('safety_status', 20).defaultTo('SAFE'); // SAFE, IN_DANGER, UNKNOWN
-    });
+    const hasUser = await knex.schema.hasTable('user');
+    if (hasUser) {
+        const hasSafetyStatus = await knex.schema.hasColumn('user', 'safety_status');
+        if (!hasSafetyStatus) {
+            await knex.schema.alterTable('user', (table) => {
+                table.string('safety_status', 20).defaultTo('SAFE');
+            });
+        }
+    }
 
-    // Add is_emergency_contact to friend table
-    await knex.schema.alterTable('friend', (table) => {
-        table.boolean('is_emergency_contact').defaultTo(false);
-    });
+    const hasFriend = await knex.schema.hasTable('friend');
+    if (hasFriend) {
+        const hasEmergencyContact = await knex.schema.hasColumn('friend', 'is_emergency_contact');
+        if (!hasEmergencyContact) {
+            await knex.schema.alterTable('friend', (table) => {
+                table.boolean('is_emergency_contact').defaultTo(false);
+            });
+        }
+    }
 };
 
 /**
@@ -19,11 +29,23 @@ exports.up = async function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function(knex) {
-    await knex.schema.alterTable('friend', (table) => {
-        table.dropColumn('is_emergency_contact');
-    });
+    const hasFriend = await knex.schema.hasTable('friend');
+    if (hasFriend) {
+        const hasEmergencyContact = await knex.schema.hasColumn('friend', 'is_emergency_contact');
+        if (hasEmergencyContact) {
+            await knex.schema.alterTable('friend', (table) => {
+                table.dropColumn('is_emergency_contact');
+            });
+        }
+    }
 
-    await knex.schema.alterTable('user', (table) => {
-        table.dropColumn('safety_status');
-    });
+    const hasUser = await knex.schema.hasTable('user');
+    if (hasUser) {
+        const hasSafetyStatus = await knex.schema.hasColumn('user', 'safety_status');
+        if (hasSafetyStatus) {
+            await knex.schema.alterTable('user', (table) => {
+                table.dropColumn('safety_status');
+            });
+        }
+    }
 };
