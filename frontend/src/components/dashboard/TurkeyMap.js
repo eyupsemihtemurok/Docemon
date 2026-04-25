@@ -33,7 +33,7 @@ export default function TurkeyMap() {
            </View>
            <View style={styles.legendItem}>
              <View style={[styles.dot, { backgroundColor: '#94a3b8' }]} />
-             <Text style={styles.legendText}>Normal</Text>
+             <Text style={styles.legendText}>Norrmal</Text>
            </View>
         </View>
       </View>
