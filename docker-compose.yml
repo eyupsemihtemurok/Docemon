@@ -74,7 +74,7 @@ services:
     stdin_open: true
     tty: true
     restart: always
-    command: npx expo start --port 8081
+    command: sh -c "npm install && npx expo start --port 8081"
 
 volumes:
   mssql_data:

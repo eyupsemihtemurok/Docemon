@@ -1,388 +1,474 @@
-import { useMemo, useState } from 'react';
-import { Modal, Platform, Pressable, ScrollView, Text, TextInput, UIManager, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import {
+  fetchActiveDisasters,
+  fetchFriendRequests,
+  fetchFriends,
+  respondFriendRequest,
+  sendFriendRequest,
+  updateEmergencyContact,
+  uploadRescuePhoto,
+} from '../services/dashboardApi';
 import styles from './styles/DashboardScreen.styles';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
+function formatDisasterLocation(disaster) {
+  return disaster.location_name || disaster.locationName || 'Konum belirtilmedi';
 }
 
-// PEOPLE list removed
+function formatDisasterLabel(disaster) {
+  const type = disaster.type || 'Bilinmeyen afet';
+  const severity = disaster.severity ? ` • ${disaster.severity}` : '';
+  return `${type}${severity}`;
+}
 
-const NEAR_RELATIVES = [
-  { id: 'nr1', initials: 'BT', name: 'Burak Tan', location: 'Adiyaman / Besni', status: 'Enkaz altinda olabilir', accent: '#ef4444', category: 'danger' },
-  { id: 'nr2', initials: 'HO', name: 'Hülya Oz', location: 'Malatya / Yesilyurt', status: 'Iletisim kesildi', accent: '#f97316', category: 'danger' },
-  { id: 'nr3', initials: 'AS', name: 'Ahmet Sabun', location: 'Adiyaman / Merkez', status: 'Guvenli bolgede', accent: '#22c55e', category: 'safe' },
-];
+function getUserDisplayName(user) {
+  if (!user) return 'Kullanıcı';
+  return user.full_name || user.fullName || user.email || 'Kullanıcı';
+}
 
-// ACTIONS list removed
-
-const PANELS = [
-  { id: 'bildirimler', title: 'Bildirimler', content: 'Henüz yeni bir bildirim bulunmuyor.', isSpecial: true },
-];
-
-export default function DashboardScreen({ activeMenuItem }) {
-  const [expandedPanel, setExpandedPanel] = useState(null);
-  const [isTanimlaVisible, setIsTanimlaVisible] = useState(false);
+export default function DashboardScreen({ activeMenuItem, authToken, currentUser }) {
+  const [friends, setFriends] = useState([]);
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [activeDisasters, setActiveDisasters] = useState([]);
+  const [receiverIdentifier, setReceiverIdentifier] = useState('');
+  const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [dashboardMessage, setDashboardMessage] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [healthDetails, setHealthDetails] = useState('');
+  const [locationDetails, setLocationDetails] = useState('');
+  const [rescueLoading, setRescueLoading] = useState(false);
+  const [rescueMessage, setRescueMessage] = useState(null);
   const [isFabMenuVisible, setIsFabMenuVisible] = useState(false);
-  const [isRelativesExpanded, setIsRelativesExpanded] = useState(true);
-  const [isAffectedModalVisible, setIsAffectedModalVisible] = useState(false);
-  const [isMissingPersonModalVisible, setIsMissingPersonModalVisible] = useState(false);
-  const [reportForm, setReportForm] = useState({
-    personId: '',
-    reason: '',
-    lastContact: ''
-  });
 
-  const stats = useMemo(
-    () => [
-      { value: '128', label: 'aktif ihbar' },
-      { value: '24', label: 'kurtarma merkezi' },
-      { value: '7 dk', label: 'ortalama eslesme' },
-    ],
-    []
-  );
+  const loadDashboard = async () => {
+    if (!authToken) {
+      setDashboardLoading(false);
+      return;
+    }
 
-  const togglePanel = (id) => {
-    setExpandedPanel(expandedPanel === id ? null : id);
+    setDashboardLoading(true);
+    setDashboardMessage(null);
+
+    try {
+      const [friendList, requestList, disasterList] = await Promise.all([
+        fetchFriends(authToken),
+        fetchFriendRequests(authToken),
+        fetchActiveDisasters(authToken),
+      ]);
+
+      setFriends(Array.isArray(friendList) ? friendList : []);
+      setPendingRequests(Array.isArray(requestList) ? requestList : []);
+      setActiveDisasters(Array.isArray(disasterList) ? disasterList : []);
+    } catch (error) {
+      setDashboardMessage({
+        type: 'error',
+        text: error?.message || 'Dashboard verileri alınamadı.',
+      });
+    } finally {
+      setDashboardLoading(false);
+    }
   };
 
-  const specialPanel = PANELS[0];
+  useEffect(() => {
+    loadDashboard();
+  }, [authToken]);
 
-  const dangerRelatives = NEAR_RELATIVES.filter(r => r.category === 'danger');
-  const safeRelatives = NEAR_RELATIVES.filter(r => r.category === 'safe');
+  const summaryCards = useMemo(
+    () => [
+      { value: activeDisasters.length, label: 'aktif afet', tone: 'warning' },
+      { value: friends.length, label: 'yakın kişi', tone: 'success' },
+      { value: pendingRequests.length, label: 'bekleyen istek', tone: 'primary' },
+    ],
+    [activeDisasters.length, friends.length, pendingRequests.length]
+  );
+
+  const handleSendRequest = async () => {
+    if (!receiverIdentifier.trim()) {
+      setDashboardMessage({ type: 'error', text: 'Arkadaş eklemek için e-posta veya kullanıcı ID girin.' });
+      return;
+    }
+
+    setActionLoading(true);
+    setDashboardMessage(null);
+
+    try {
+      await sendFriendRequest(authToken, receiverIdentifier.trim());
+      setReceiverIdentifier('');
+      setDashboardMessage({ type: 'success', text: 'Arkadaş isteği gönderildi.' });
+      await loadDashboard();
+    } catch (error) {
+      setDashboardMessage({
+        type: 'error',
+        text: error?.message || 'Arkadaş isteği gönderilemedi.',
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRespondRequest = async (requestId, status) => {
+    setActionLoading(true);
+    setDashboardMessage(null);
+
+    try {
+      await respondFriendRequest(authToken, requestId, status);
+      setDashboardMessage({ type: 'success', text: 'Arkadaş isteği güncellendi.' });
+      await loadDashboard();
+    } catch (error) {
+      setDashboardMessage({
+        type: 'error',
+        text: error?.message || 'İstek yanıtlanamadı.',
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleToggleEmergency = async (friendshipId, currentValue) => {
+    setActionLoading(true);
+    setDashboardMessage(null);
+
+    try {
+      await updateEmergencyContact(authToken, friendshipId, !currentValue);
+      setDashboardMessage({ type: 'success', text: 'Acil durum kişisi güncellendi.' });
+      await loadDashboard();
+    } catch (error) {
+      setDashboardMessage({
+        type: 'error',
+        text: error?.message || 'Acil kişi ayarı değiştirilemedi.',
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handlePickImage = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permission.granted) {
+      setRescueMessage({
+        type: 'error',
+        text: 'Kamera izni verilmedi. Lütfen kamera erişimine izin verin.',
+      });
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      quality: 0.9,
+      cameraType: ImagePicker.CameraType.back,
+    });
+
+    if (!result.canceled && result.assets?.length) {
+      setSelectedImage(result.assets[0]);
+      setRescueMessage(null);
+    }
+  };
+
+  const handleRescueSubmit = async () => {
+    if (!selectedImage) {
+      setRescueMessage({ type: 'error', text: 'Lütfen önce bir fotoğraf seçin.' });
+      return;
+    }
+
+    setRescueLoading(true);
+    setRescueMessage(null);
+
+    try {
+      const result = await uploadRescuePhoto(authToken, {
+        imageAsset: selectedImage,
+        healthDetails,
+        locationDetails,
+      });
+
+      setRescueMessage({
+        type: 'success',
+        text: result?.message || `${result?.matchCount || 0} potansiyel eşleşme bulundu.`,
+      });
+      setSelectedImage(null);
+      setHealthDetails('');
+      setLocationDetails('');
+    } catch (error) {
+      setRescueMessage({
+        type: 'error',
+        text: error?.message || 'Fotoğraf gönderilemedi.',
+      });
+    } finally {
+      setRescueLoading(false);
+    }
+  };
 
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
         <View style={styles.heroCard}>
           <View style={styles.heroTopRow}>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.eyebrow}>AFET DESTEK PLATFORMU</Text>
-
-              {/* Notification Panel Only */}
-              {specialPanel && (
-                <Pressable
-                  style={[styles.panelCardSpecial]}
-                  onPress={() => togglePanel(specialPanel.id)}
-                >
-                  <Text style={styles.panelTitleSpecial}>{specialPanel.title}</Text>
-                  {expandedPanel === specialPanel.id && (
-                    <Text style={styles.panelContent}>{specialPanel.content}</Text>
-                  )}
-                </Pressable>
-              )}
-
-              <Text style={styles.title}>Anlık Afet Bölgesi İstatistikleri</Text>
-
-              {/* Statistics Details Grid */}
-              <View style={styles.detailsGrid}>
-                <View style={styles.detailItem}>
-                  <Text style={styles.detailLabel}>Konum / Şehir</Text>
-                  <Text style={styles.detailValue}>Kahramanmaraş / Elbistan</Text>
-                </View>
-                <View style={styles.detailItem}>
-                  <Text style={styles.detailLabel}>Anlık Saat</Text>
-                  <Text style={styles.detailValue}>17:25</Text>
-                </View>
-                <View style={styles.detailItem}>
-                  <Text style={styles.detailLabel}>Afet Türü</Text>
-                  <Text style={styles.detailValue}>Deprem (M 7.6)</Text>
-                </View>
-                <View style={styles.detailItem}>
-                  <Text style={styles.detailLabel}>Etkilenen Tahmini</Text>
-                  <Text style={styles.detailValue}>~12.500 Kişi</Text>
-                </View>
-              </View>
+              <Text style={styles.title}>Canlı afet kontrol paneli</Text>
+              <Text style={styles.subtitle}>
+                {getUserDisplayName(currentUser)} için arkadaşlar, aktif afetler ve kurtarma akışları tek ekranda.
+              </Text>
             </View>
 
             <View style={styles.liveActionsRow}>
               <View style={styles.liveBadge}>
                 <View style={styles.liveDot} />
-                <Text style={styles.liveText}>Canli izleme</Text>
+                <Text style={styles.liveText}>Canlı izleme</Text>
               </View>
-
-              {dangerRelatives.length > 0 && (
-                <Pressable
-                  style={styles.affectedTrigger}
-                  onPress={() => setIsAffectedModalVisible(true)}
-                >
-                  <Text style={styles.affectedTriggerIcon}>⚠️</Text>
-                  <Text style={styles.affectedTriggerText}>Muhtemel Etkilenen Yakınlar ({dangerRelatives.length})</Text>
-                </Pressable>
-              )}
+              <Text style={styles.colorCaption}>{activeMenuItem || 'Dashboard görünümü'}</Text>
             </View>
           </View>
 
-          <View style={styles.statsRow}>
-            {stats.map((item) => (
-              <View key={item.label} style={styles.statCard}>
-                <Text style={styles.statValue}>{item.value}</Text>
-                <Text style={styles.statLabel}>{item.label}</Text>
+          <View style={styles.summaryGrid}>
+            {summaryCards.map((item) => (
+              <View key={item.label} style={[styles.summaryCard, styles[`summaryCard${item.tone}`]]}>
+                <Text style={styles.summaryValue}>{item.value}</Text>
+                <Text style={styles.summaryLabel}>{item.label}</Text>
               </View>
             ))}
           </View>
+
+          <View style={styles.disasterPanel}>
+            <View style={styles.sectionHeader}>
+              <View>
+                <Text style={styles.sectionTitle}>Aktif Afetler</Text>
+                <Text style={styles.sectionDescription}>Backend’den gelen canlı afet listesi.</Text>
+              </View>
+            </View>
+
+            {dashboardLoading ? (
+              <View style={styles.loadingBox}>
+                <ActivityIndicator color="#0f766e" />
+                <Text style={styles.loadingText}>Veriler yükleniyor...</Text>
+              </View>
+            ) : activeDisasters.length > 0 ? (
+              <View style={styles.disasterList}>
+                {activeDisasters.slice(0, 3).map((disaster) => (
+                  <View key={disaster.id} style={styles.disasterCard}>
+                    <View style={styles.disasterCardHeader}>
+                      <Text style={styles.disasterTitle}>{formatDisasterLabel(disaster)}</Text>
+                      <View style={styles.disasterBadge}>
+                        <Text style={styles.disasterBadgeText}>CANLI</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.disasterLocation}>{formatDisasterLocation(disaster)}</Text>
+                    <Text style={styles.disasterDescription} numberOfLines={2}>
+                      {disaster.description || 'Açıklama bulunmuyor.'}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateTitle}>Aktif afet bulunmuyor</Text>
+                <Text style={styles.emptyStateText}>Yeni afet kaydı oluştuğunda burada canlı olarak görünecek.</Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.requestPanel}>
+            <View style={styles.sectionHeader}>
+              <View>
+                <Text style={styles.sectionTitle}>Arkadaş Yönetimi</Text>
+                <Text style={styles.sectionDescription}>Yeni istek gönderin, gelen istekleri burada onaylayın veya reddedin.</Text>
+              </View>
+            </View>
+
+            <View style={styles.inlineForm}>
+              <TextInput
+                style={styles.receiverInput}
+                placeholder="E-posta veya kullanıcı ID"
+                placeholderTextColor="#64748b"
+                value={receiverIdentifier}
+                onChangeText={setReceiverIdentifier}
+                autoCapitalize="none"
+              />
+              <Pressable style={styles.sendButton} onPress={handleSendRequest} disabled={actionLoading}>
+                <Text style={styles.sendButtonText}>{actionLoading ? 'Bekleyin' : 'İstek Gönder'}</Text>
+              </Pressable>
+            </View>
+
+            {dashboardMessage && (
+              <View style={[styles.feedbackBox, dashboardMessage.type === 'error' ? styles.feedbackError : styles.feedbackSuccess]}>
+                <Text style={styles.feedbackText}>{dashboardMessage.text}</Text>
+              </View>
+            )}
+
+            <View style={styles.requestList}>
+              {pendingRequests.length > 0 ? (
+                pendingRequests.map((request) => {
+                  const isIncoming = request.direction === 'incoming';
+                  const displayName = isIncoming ? request.senderName : request.receiverName;
+
+                  return (
+                    <View key={request.requestId} style={styles.requestCard}>
+                      <View style={styles.requestCardTop}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.requestName}>{displayName || 'Bilinmeyen kullanıcı'}</Text>
+                          <Text style={styles.requestMeta}>
+                            {isIncoming ? request.senderEmail : request.receiverEmail}
+                          </Text>
+                        </View>
+                        <View style={styles.requestStatusPill}>
+                          <Text style={styles.requestStatusText}>{isIncoming ? 'Gelen' : 'Giden'}</Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.requestActions}>
+                        {isIncoming ? (
+                          <>
+                            <Pressable
+                              style={[styles.requestButton, styles.requestButtonPrimary]}
+                              onPress={() => handleRespondRequest(request.requestId, 'ACCEPTED')}
+                              disabled={actionLoading}
+                            >
+                              <Text style={styles.requestButtonPrimaryText}>Kabul Et</Text>
+                            </Pressable>
+                            <Pressable
+                              style={[styles.requestButton, styles.requestButtonSecondary]}
+                              onPress={() => handleRespondRequest(request.requestId, 'REJECTED')}
+                              disabled={actionLoading}
+                            >
+                              <Text style={styles.requestButtonSecondaryText}>Reddet</Text>
+                            </Pressable>
+                          </>
+                        ) : (
+                          <Text style={styles.requestPendingText}>Karşı tarafın yanıtı bekleniyor.</Text>
+                        )}
+                      </View>
+                    </View>
+                  );
+                })
+              ) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateTitle}>Bekleyen arkadaş isteği yok</Text>
+                  <Text style={styles.emptyStateText}>Yeni bir istek gönderdiğinizde veya size bir istek geldiğinde burada görünecek.</Text>
+                </View>
+              )}
+            </View>
+          </View>
         </View>
 
-
-        {/* Tehlikedeki Yakınlarım Section */}
         <View style={styles.heroCard}>
-          <Pressable
-            style={styles.inlineSectionHeader}
-            onPress={() => setIsRelativesExpanded(!isRelativesExpanded)}
-          >
-            <Text style={[styles.sectionTitleEmbedded, { marginBottom: 0 }]}>Yakınlarım</Text>
-            <Text style={{ fontSize: 18, color: '#15803d' }}>
-              {isRelativesExpanded ? '▲' : '▼'}
-            </Text>
-          </Pressable>
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={styles.sectionTitleEmbedded}>Yakınlarım</Text>
+              <Text style={styles.sectionDescription}>Arkadaşlarınızı ve acil durum kişilerinizi yönetebilirsiniz.</Text>
+            </View>
+          </View>
 
-          {isRelativesExpanded && (
-            <>
-              {dangerRelatives.length > 0 && (
-                <View style={{ marginTop: 12 }}>
-                  <Text style={[styles.categoryTitle, styles.dangerText]}>Potansiyel Tehlike</Text>
-                  <View style={styles.peopleGrid}>
-                    {dangerRelatives.map((person) => (
-                      <View key={person.id} style={[styles.personCard, { borderColor: '#fecaca' }]}>
-                        <View style={styles.personPhotoWrap}>
-                          <View style={[styles.personPhoto, { backgroundColor: person.accent, width: 50, height: 50 }]}>
-                            <Text style={[styles.personPhotoText, { fontSize: 16 }]}>{person.initials}</Text>
-                          </View>
-                          <View style={[styles.badgeWrap, { borderColor: '#fca5a5' }]}>
-                            <Text style={[styles.badgeText, { color: '#dc2626' }]}>TEHLİKEDE</Text>
-                          </View>
-                        </View>
-                        <Text style={styles.personName}>{person.name}</Text>
-                        <Text style={styles.personLocation}>{person.location}</Text>
-                        <Text style={styles.personStatus}>{person.status}</Text>
-                      </View>
-                    ))}
+          {friends.length > 0 ? (
+            <View style={styles.peopleGrid}>
+              {friends.map((person) => (
+                <View key={person.friendshipId} style={styles.personCard}>
+                  <View style={styles.personPhotoWrap}>
+                    <View style={[styles.personPhoto, { backgroundColor: '#0f766e' }]}>
+                      <Text style={styles.personPhotoText}>{(person.fullName || person.name || '?').charAt(0).toUpperCase()}</Text>
+                    </View>
+                    <View style={[styles.badgeWrap, person.isEmergencyContact ? styles.badgeWrapActive : styles.badgeWrapInactive]}>
+                      <Text style={[styles.badgeText, person.isEmergencyContact ? styles.badgeTextActive : styles.badgeTextInactive]}>
+                        {person.isEmergencyContact ? 'Acil Kişi' : 'Arkadaş'}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Text style={styles.personName}>{person.fullName || 'İsimsiz kişi'}</Text>
+                  <Text style={styles.personLocation}>{person.email || 'E-posta yok'}</Text>
+                  <Text style={styles.personStatus}>{person.safetyStatus || 'Durum bilgisi yok'}</Text>
+
+                  <View style={styles.friendCardFooter}>
+                    <Pressable
+                      style={[styles.friendActionButton, person.isEmergencyContact ? styles.friendActionButtonNeutral : styles.friendActionButtonPrimary]}
+                      onPress={() => handleToggleEmergency(person.friendshipId, Boolean(person.isEmergencyContact))}
+                      disabled={actionLoading}
+                    >
+                      <Text style={[styles.friendActionButtonText, person.isEmergencyContact && styles.friendActionButtonTextDark]}>
+                        {person.isEmergencyContact ? 'Acil Kişiden Çıkar' : 'Acil Kişi Yap'}
+                      </Text>
+                    </Pressable>
                   </View>
                 </View>
-              )}
-
-              {safeRelatives.length > 0 && (
-                <View style={{ marginTop: 16 }}>
-                  <Text style={[styles.categoryTitle, styles.safeText]}>Güvende</Text>
-                  <View style={styles.peopleGrid}>
-                    {safeRelatives.map((person) => (
-                      <View key={person.id} style={[styles.personCard, { borderColor: '#d1fae5' }]}>
-                        <View style={styles.personPhotoWrap}>
-                          <View style={[styles.personPhoto, { backgroundColor: person.accent, width: 50, height: 50 }]}>
-                            <Text style={[styles.personPhotoText, { fontSize: 16 }]}>{person.initials}</Text>
-                          </View>
-                          <View style={[styles.badgeWrap, { borderColor: '#bbf7d0' }]}>
-                            <Text style={[styles.badgeText, { color: '#16a34a' }]}>GÜVENDE</Text>
-                          </View>
-                        </View>
-                        <Text style={styles.personName}>{person.name}</Text>
-                        <Text style={styles.personLocation}>{person.location}</Text>
-                        <Text style={styles.personStatus}>{person.status}</Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              )}
-            </>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateTitle}>Henüz yakın kişi eklenmedi</Text>
+              <Text style={styles.emptyStateText}>Üstteki arkadaş isteği alanından yeni kişi ekleyebilirsiniz.</Text>
+            </View>
           )}
         </View>
 
         <View style={styles.heroCard}>
-          <View style={styles.inlineSectionHeader}>
+          <View style={styles.sectionHeader}>
             <View style={{ flex: 1 }}>
               <Text style={styles.sectionTitleEmbedded}>Afetzede Tanıla</Text>
               <Text style={styles.sectionDescription}>
-                Bulunan afetzedelerin fotoğraflarını çekerek sistemdeki kayıtlı kişilerle hızlıca sorgulanmasını sağlayabilirsiniz.
+                Fotoğrafı seçin, sağlık ve konum notunu ekleyin; sistem eşleşme sonucu üretsin.
               </Text>
             </View>
-            <Pressable style={styles.tanimlaButton} onPress={() => setIsTanimlaVisible(true)}>
-              <Text style={styles.tanimlaButtonText}>Tanımla</Text>
+          </View>
+
+          <View style={styles.rescuePanel}>
+            <Pressable style={styles.rescuePicker} onPress={handlePickImage}>
+              <Text style={styles.rescuePickerTitle}>Kamerayı aç</Text>
+              <Text style={styles.rescuePickerText}>
+                Afetzedeyi anlık olarak kameradan çekin ve eşleştirmeyi başlatın.
+              </Text>
+            </Pressable>
+
+            {selectedImage && (
+              <View style={styles.rescuePreview}>
+                <Image source={{ uri: selectedImage.uri }} style={styles.rescuePreviewImage} />
+                <Text style={styles.rescuePreviewText} numberOfLines={1}>
+                  {selectedImage.fileName || selectedImage.uri}
+                </Text>
+              </View>
+            )}
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Sağlık bilgisi</Text>
+              <TextInput
+                style={[styles.premiumInput, styles.premiumTextArea]}
+                placeholder="Örn: Bilinci açık, hafif yaralı"
+                placeholderTextColor="#64748b"
+                multiline
+                value={healthDetails}
+                onChangeText={setHealthDetails}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Konum notu</Text>
+              <TextInput
+                style={styles.premiumInput}
+                placeholder="Örn: Elbistan merkez, okul binası"
+                placeholderTextColor="#64748b"
+                value={locationDetails}
+                onChangeText={setLocationDetails}
+              />
+            </View>
+
+            {rescueMessage && (
+              <View style={[styles.feedbackBox, rescueMessage.type === 'error' ? styles.feedbackError : styles.feedbackSuccess]}>
+                <Text style={styles.feedbackText}>{rescueMessage.text}</Text>
+              </View>
+            )}
+
+            <Pressable style={styles.rescueButton} onPress={handleRescueSubmit} disabled={rescueLoading}>
+              {rescueLoading ? (
+                <ActivityIndicator color="#ffffff" />
+              ) : (
+                <Text style={styles.rescueButtonText}>Tanımlamayı Başlat</Text>
+              )}
             </Pressable>
           </View>
         </View>
-
       </ScrollView>
 
-      {/* MODALS */}
-      {/* Tanımla Modal */}
-      <Modal
-        visible={isTanimlaVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setIsTanimlaVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Tanımlama ekranı</Text>
-
-            <Pressable style={styles.modalButtonSecondary}>
-              <Text style={styles.modalButtonTextSecondary}>📷 Fotoğraf çek</Text>
-            </Pressable>
-
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <Pressable
-                style={[styles.modalButton, { flex: 1 }]}
-                onPress={() => setIsTanimlaVisible(false)}
-              >
-                <Text style={styles.modalButtonText}>Gönder</Text>
-              </Pressable>
-
-              <Pressable
-                style={[styles.modalButtonSecondary, { flex: 1 }]}
-                onPress={() => setIsTanimlaVisible(false)}
-              >
-                <Text style={styles.modalButtonTextSecondary}>İptal</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Affected Relatives Modal */}
-      <Modal
-        visible={isAffectedModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setIsAffectedModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { maxHeight: '80%', padding: 20 }]}>
-            <View style={styles.modalHeader}>
-              <View style={styles.modalTitleContainer}>
-                <Text style={styles.modalTitle}>Muhtemel Etkilenen Yakınlar</Text>
-                <Text style={styles.modalSubtitle}>Afet bölgesindeki potansiyel risk altındaki yakınlarınız.</Text>
-              </View>
-              <Pressable
-                style={styles.closeButton}
-                onPress={() => setIsAffectedModalVisible(false)}
-              >
-                <Text style={styles.closeButtonText}>×</Text>
-              </Pressable>
-            </View>
-
-            <ScrollView style={styles.modalScroll}>
-              {dangerRelatives.map((person) => (
-                <View key={person.id} style={styles.modalPersonCard}>
-                  <View style={styles.modalPersonInfo}>
-                    <View style={[styles.personAvatar, { backgroundColor: person.accent }]}>
-                      <Text style={styles.personAvatarText}>{person.initials}</Text>
-                    </View>
-                    <View>
-                      <Text style={styles.modalPersonName}>{person.name}</Text>
-                      <Text style={styles.modalPersonStatus}>{person.status}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.modalPersonLocationWrap}>
-                    <Text style={styles.modalPersonLocation}>📍 {person.location}</Text>
-                  </View>
-                </View>
-              ))}
-            </ScrollView>
-
-            <Pressable
-              style={styles.modalButton}
-              onPress={() => setIsAffectedModalVisible(false)}
-            >
-              <Text style={styles.modalButtonText}>Kapat</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Missing Person Report Modal */}
-      <Modal
-        visible={isMissingPersonModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setIsMissingPersonModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { maxHeight: '90%', padding: 24 }]}>
-            <View style={styles.modalHeader}>
-              <View style={styles.modalTitleContainer}>
-                <Text style={styles.modalTitle}>Kayıp Şüphesi Bildir</Text>
-                <Text style={styles.modalSubtitle}>Lütfen gerekli bilgileri eksiksiz doldurunuz.</Text>
-              </View>
-              <Pressable
-                style={styles.closeButton}
-                onPress={() => setIsMissingPersonModalVisible(false)}
-              >
-                <Text style={styles.closeButtonText}>×</Text>
-              </Pressable>
-            </View>
-
-            <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>İletişim Kurulamayan Kişi</Text>
-                <View style={styles.dropdownWrap}>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-                    {NEAR_RELATIVES.map((person) => (
-                      <Pressable
-                        key={person.id}
-                        style={[
-                          styles.personChip,
-                          reportForm.personId === person.id && styles.personChipSelected
-                        ]}
-                        onPress={() => setReportForm({ ...reportForm, personId: person.id })}
-                      >
-                        <View style={[styles.chipAvatar, { backgroundColor: person.accent }]}>
-                          <Text style={styles.chipAvatarText}>{person.initials}</Text>
-                        </View>
-                        <Text style={[
-                          styles.chipName,
-                          reportForm.personId === person.id && styles.chipNameSelected
-                        ]}>{person.name}</Text>
-                      </Pressable>
-                    ))}
-                  </ScrollView>
-                </View>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Bildiri Nedeni</Text>
-                <TextInput
-                  style={[styles.premiumInput, { height: 80, textAlignVertical: 'top' }]}
-                  placeholder="Örn: Telefonuna ulaşılamıyor, konumu değişmiyor..."
-                  multiline
-                  value={reportForm.reason}
-                  onChangeText={(text) => setReportForm({ ...reportForm, reason: text })}
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Son İletişim Zamanı ve Şekli</Text>
-                <TextInput
-                  style={styles.premiumInput}
-                  placeholder="Örn: Bugün 14:30, WhatsApp mesajı"
-                  value={reportForm.lastContact}
-                  onChangeText={(text) => setReportForm({ ...reportForm, lastContact: text })}
-                />
-              </View>
-            </ScrollView>
-
-            <View style={styles.modalFooterActions}>
-              <Pressable
-                style={[styles.modalButton, { flex: 2 }]}
-                onPress={() => {
-                  alert('Bildiri başarıyla gönderildi.');
-                  setIsMissingPersonModalVisible(false);
-                  setReportForm({ personId: '', reason: '', lastContact: '' });
-                }}
-              >
-                <Text style={styles.modalButtonText}>Bildiriyi Gönder</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.modalButtonSecondary, { flex: 1 }]}
-                onPress={() => setIsMissingPersonModalVisible(false)}
-              >
-                <Text style={styles.modalButtonTextSecondary}>İptal</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* FAB Overlay Background */}
       {isFabMenuVisible && (
         <Pressable
           style={styles.fabMenuOverlay}
@@ -390,7 +476,6 @@ export default function DashboardScreen({ activeMenuItem }) {
         />
       )}
 
-      {/* FAB Menu */}
       {isFabMenuVisible && (
         <View style={styles.fabMenu}>
           <Pressable style={styles.menuItemPill} onPress={() => setIsFabMenuVisible(false)}>
@@ -403,11 +488,10 @@ export default function DashboardScreen({ activeMenuItem }) {
             <Text style={styles.menuItemIcon}>ℹ️</Text>
           </Pressable>
 
-          <Pressable 
-            style={[styles.menuItemPill, styles.menuItemPillPrimary]} 
+          <Pressable
+            style={[styles.menuItemPill, styles.menuItemPillPrimary]}
             onPress={() => {
               setIsFabMenuVisible(false);
-              setIsMissingPersonModalVisible(true);
             }}
           >
             <Text style={[styles.menuItemText, styles.menuItemTextPrimary]}>Kayıp Şüphesi</Text>
@@ -416,7 +500,6 @@ export default function DashboardScreen({ activeMenuItem }) {
         </View>
       )}
 
-      {/* Floating Action Button */}
       <Pressable
         style={styles.fab}
         onPress={() => setIsFabMenuVisible(!isFabMenuVisible)}
@@ -426,5 +509,3 @@ export default function DashboardScreen({ activeMenuItem }) {
     </View>
   );
 }
-
-

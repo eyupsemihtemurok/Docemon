@@ -596,4 +596,342 @@ export default StyleSheet.create({
   menuItemIconPrimary: {
     // Optional: add specific icon style if needed
   },
+  summaryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 18,
+  },
+  summaryCard: {
+    flexGrow: 1,
+    minWidth: 96,
+    borderRadius: 18,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+  },
+  summaryCardwarning: {
+    backgroundColor: '#fffbeb',
+    borderColor: '#fde68a',
+  },
+  summaryCardsuccess: {
+    backgroundColor: '#f0fdf4',
+    borderColor: '#bbf7d0',
+  },
+  summaryCardprimary: {
+    backgroundColor: '#ecfeff',
+    borderColor: '#a5f3fc',
+  },
+  summaryValue: {
+    color: '#052e16',
+    fontSize: 20,
+    fontWeight: '900',
+  },
+  summaryLabel: {
+    color: '#475569',
+    fontSize: 12,
+    marginTop: 2,
+    fontWeight: '700',
+  },
+  disasterPanel: {
+    marginTop: 18,
+  },
+  disasterList: {
+    gap: 10,
+    marginTop: 12,
+  },
+  disasterCard: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  disasterCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  disasterTitle: {
+    flex: 1,
+    color: '#052e16',
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  disasterBadge: {
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: '#dcfce7',
+  },
+  disasterBadgeText: {
+    color: '#166534',
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 0.7,
+  },
+  disasterLocation: {
+    color: '#0f766e',
+    fontSize: 13,
+    marginTop: 8,
+    fontWeight: '700',
+  },
+  disasterDescription: {
+    color: '#475569',
+    fontSize: 13,
+    marginTop: 6,
+    lineHeight: 19,
+  },
+  loadingBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 12,
+  },
+  loadingText: {
+    color: '#475569',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  emptyState: {
+    marginTop: 12,
+    padding: 16,
+    borderRadius: 18,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  emptyStateTitle: {
+    color: '#052e16',
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  emptyStateText: {
+    color: '#475569',
+    fontSize: 13,
+    marginTop: 4,
+    lineHeight: 19,
+  },
+  requestPanel: {
+    marginTop: 18,
+    paddingTop: 18,
+    borderTopWidth: 1,
+    borderTopColor: '#d1fae5',
+  },
+  inlineForm: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 12,
+    flexWrap: 'wrap',
+  },
+  receiverInput: {
+    flex: 1,
+    minWidth: 220,
+    borderWidth: 1,
+    borderColor: '#bbf7d0',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    color: '#052e16',
+    backgroundColor: '#f0fdf4',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  sendButton: {
+    backgroundColor: '#0f766e',
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sendButtonText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  feedbackBox: {
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginTop: 12,
+    borderWidth: 1,
+  },
+  feedbackError: {
+    backgroundColor: '#fef2f2',
+    borderColor: '#fecaca',
+  },
+  feedbackSuccess: {
+    backgroundColor: '#f0fdf4',
+    borderColor: '#bbf7d0',
+  },
+  feedbackText: {
+    color: '#334155',
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  requestList: {
+    gap: 12,
+    marginTop: 14,
+  },
+  requestCard: {
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#d1fae5',
+    backgroundColor: '#ffffff',
+    padding: 14,
+  },
+  requestCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  requestName: {
+    color: '#052e16',
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  requestMeta: {
+    color: '#64748b',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  requestStatusPill: {
+    borderRadius: 999,
+    backgroundColor: '#dcfce7',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+  },
+  requestStatusText: {
+    color: '#166534',
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 0.7,
+  },
+  requestActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 12,
+    flexWrap: 'wrap',
+  },
+  requestButton: {
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
+  requestButtonPrimary: {
+    backgroundColor: '#0f766e',
+  },
+  requestButtonPrimaryText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  requestButtonSecondary: {
+    backgroundColor: '#f1f5f9',
+  },
+  requestButtonSecondaryText: {
+    color: '#475569',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  requestPendingText: {
+    color: '#64748b',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  badgeWrapActive: {
+    borderColor: '#bbf7d0',
+    backgroundColor: '#f0fdf4',
+  },
+  badgeWrapInactive: {
+    borderColor: '#e2e8f0',
+    backgroundColor: '#f8fafc',
+  },
+  badgeTextActive: {
+    color: '#166534',
+  },
+  badgeTextInactive: {
+    color: '#475569',
+  },
+  friendCardFooter: {
+    marginTop: 12,
+  },
+  friendActionButton: {
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
+  friendActionButtonPrimary: {
+    backgroundColor: '#15803d',
+  },
+  friendActionButtonNeutral: {
+    backgroundColor: '#f1f5f9',
+  },
+  friendActionButtonText: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#ffffff',
+  },
+  friendActionButtonTextDark: {
+    color: '#475569',
+  },
+  rescuePanel: {
+    marginTop: 12,
+    gap: 12,
+  },
+  rescuePicker: {
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#fde68a',
+    backgroundColor: '#fffbeb',
+    padding: 16,
+  },
+  rescuePickerTitle: {
+    color: '#92400e',
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  rescuePickerText: {
+    color: '#78350f',
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 4,
+  },
+  rescuePreview: {
+    borderRadius: 18,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    overflow: 'hidden',
+  },
+  rescuePreviewImage: {
+    width: '100%',
+    height: 180,
+    backgroundColor: '#e2e8f0',
+  },
+  rescuePreviewText: {
+    color: '#475569',
+    fontSize: 12,
+    padding: 12,
+    fontWeight: '700',
+  },
+  premiumTextArea: {
+    minHeight: 84,
+    textAlignVertical: 'top',
+  },
+  rescueButton: {
+    backgroundColor: '#0f766e',
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  rescueButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '900',
+  },
 });
