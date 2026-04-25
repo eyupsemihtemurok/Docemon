@@ -1,4 +1,4 @@
-import { SafeAreaView, View, Text, Pressable, StyleSheet, Animated, Easing, Modal } from 'react-native';
+import { SafeAreaView, View, Text, Pressable, StyleSheet, Animated, Easing, Modal, ScrollView } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
 import HomePage from './pages/HomePage';
 import ServicesPage from './pages/ServicesPage';
@@ -17,6 +17,7 @@ export default function App() {
   const [active, setActive] = useState('home');
   const [menuOpen, setMenuOpen] = useState(false);
   const menuAnim = useRef(new Animated.Value(0)).current;
+  const activeLabel = MENU_OPTIONS.find((option) => option.id === active)?.label || 'Ana Sayfa';
 
   const PAGES = {
     home: HomePage,
@@ -32,7 +33,7 @@ export default function App() {
       toValue: menuOpen ? 1 : 0,
       duration: 220,
       easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start();
   }, [menuAnim, menuOpen]);
 
@@ -94,9 +95,18 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.orbTop} />
+      <View style={styles.orbBottom} />
       <View style={styles.navbar}>
         <View style={styles.navTopRow}>
-          <Text style={styles.navTitle}>Dokemon</Text>
+          <View>
+            <Text style={styles.navEyebrow}>hackathon26</Text>
+            <Text style={styles.navTitle}>Dokemon</Text>
+          </View>
+          <View style={styles.navStatusPill}>
+            <View style={styles.navStatusDot} />
+            <Text style={styles.navStatusText}>Docker Ready</Text>
+          </View>
           <Pressable
             onPress={() => setMenuOpen((prev) => !prev)}
             style={styles.burgerButton}
@@ -160,9 +170,34 @@ export default function App() {
         </View>
       </Modal>
 
-      <View style={styles.content}>
-        <ActivePage />
-      </View>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.heroCard}>
+          <Text style={styles.heroKicker}>Canlı önizleme</Text>
+          <Text style={styles.heroTitle}>{activeLabel}</Text>
+          <Text style={styles.heroSubtitle}>
+            Sayfalar artık Docker içinde de aynı içerikle render ediliyor. Menüden bölümler arasında geçiş yapabilirsin.
+          </Text>
+
+          <View style={styles.heroStatsRow}>
+            <View style={styles.heroStatCard}>
+              <Text style={styles.heroStatValue}>4</Text>
+              <Text style={styles.heroStatLabel}>Bölüm</Text>
+            </View>
+            <View style={styles.heroStatCard}>
+              <Text style={styles.heroStatValue}>19006</Text>
+              <Text style={styles.heroStatLabel}>Web Portu</Text>
+            </View>
+            <View style={styles.heroStatCard}>
+              <Text style={styles.heroStatValue}>OK</Text>
+              <Text style={styles.heroStatLabel}>Compose</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.contentCard}>
+          <ActivePage />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -170,27 +205,75 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f7f9fc',
+    backgroundColor: '#e9efff',
+  },
+  orbTop: {
+    position: 'absolute',
+    top: -70,
+    right: -80,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(96, 165, 250, 0.20)',
+  },
+  orbBottom: {
+    position: 'absolute',
+    bottom: -90,
+    left: -60,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
   },
   navbar: {
-    paddingTop: 8,
+    paddingTop: 14,
     paddingHorizontal: 16,
-    paddingBottom: 12,
-    backgroundColor: '#1e3a8a',
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
+    paddingBottom: 16,
+    backgroundColor: '#0f2b6d',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
     position: 'relative',
+    zIndex: 2,
+    boxShadow: '0 12px 28px rgba(15, 23, 42, 0.18)',
   },
   navTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 12,
+  },
+  navEyebrow: {
+    color: 'rgba(255, 255, 255, 0.72)',
+    fontSize: 12,
+    letterSpacing: 1.1,
+    textTransform: 'uppercase',
+    marginBottom: 2,
   },
   navTitle: {
     color: '#ffffff',
     fontSize: 22,
     fontWeight: '700',
     textAlign: 'left',
+  },
+  navStatusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255, 255, 255, 0.14)',
+    gap: 8,
+  },
+  navStatusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#34d399',
+  },
+  navStatusText: {
+    color: '#ffffff',
+    fontSize: 12,
+    fontWeight: '600',
   },
   burgerButton: {
     width: 40,
@@ -223,10 +306,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderTopLeftRadius: 20,
     borderBottomLeftRadius: 20,
-    shadowColor: '#0f172a',
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    shadowOffset: { width: -4, height: 0 },
+    boxShadow: '0 16px 40px rgba(15, 23, 42, 0.24)',
     elevation: 12,
   },
   backdrop: {
@@ -254,6 +334,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
+    boxShadow: '0 10px 20px rgba(37, 99, 235, 0.18)',
   },
   profileCircleText: {
     color: '#1e3a8a',
@@ -295,14 +376,72 @@ const styles = StyleSheet.create({
   menuItemText: {
     color: '#1e293b',
     fontWeight: '600',
-    textDecorationLine: 'underline',
   },
   menuItemTextActive: {
     color: '#1e3a8a',
   },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 20,
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 28,
+    gap: 16,
+  },
+  heroCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    padding: 18,
+    boxShadow: '0 14px 36px rgba(15, 23, 42, 0.10)',
+    gap: 10,
+  },
+  heroKicker: {
+    color: '#2563eb',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  heroTitle: {
+    color: '#0f172a',
+    fontSize: 24,
+    fontWeight: '800',
+  },
+  heroSubtitle: {
+    color: '#334155',
+    fontSize: 15,
+    lineHeight: 21,
+  },
+  heroStatsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    flexWrap: 'wrap',
+    marginTop: 6,
+  },
+  heroStatCard: {
+    flexGrow: 1,
+    minWidth: 92,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: '#eff6ff',
+    borderWidth: 1,
+    borderColor: '#dbeafe',
+  },
+  heroStatValue: {
+    color: '#0f172a',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  heroStatLabel: {
+    color: '#475569',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  contentCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    paddingVertical: 18,
+    paddingHorizontal: 16,
+    boxShadow: '0 16px 34px rgba(15, 23, 42, 0.10)',
+    marginBottom: 6,
   },
 });
