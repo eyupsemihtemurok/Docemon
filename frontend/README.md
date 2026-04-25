@@ -1,25 +1,44 @@
-# hackathon26 - Frontend & Mobile
+# hackathon26 Frontend
 
-Bu klasör, Expo (React Native) kullanılarak geliştirilen ve hem Web hem de Mobil platformlarda çalışabilen kullanıcı arayüzü projesini içerir.
+Expo tabanli React Native arayuzu. Web ve mobil (Expo Go) gelistirme akislarini destekler.
 
-## 🚀 Öne Çıkan Özellikler
-- **Cross-Platform:** iOS, Android ve Web için tek kod tabanı.
-- **Expo Router:** Dosya tabanlı yönlendirme (Routing) mekanizması.
-- **Responsive Design:** Web ve mobil ekranlarına uyumlu tasarım.
+## Uygulama Akisi
+- `/home`: Navbar yok. Yapilacaklar kutusu, reklam icerir alani ve Kayit ol butonu.
+- `/loginPage`: Kayit ol / Giris yap ekrani.
+- `/dashboard`: Login sonrasi acilan ekran. Navbar + burger menu + yan panel + placeholder menu butonlari.
 
-## 📁 Klasör Yapısı
-- **src/components:** Yeniden kullanılabilir UI bileşenleri.
-- **src/app:** Sayfa yapıları ve yönlendirmeler (Expo Router).
-- **src/services:** Backend API çağrıları.
-- **src/hooks:** Özel React hook'ları.
-- **src/constants:** Renkler, yazı tipleri ve sabit değerler.
+## Klasor Yapisi
+- `App.js`: Sadece giris noktasi, `AppRoot` render eder.
+- `src/app/AppRoot.js`: Route kontrolu ve sayfa orkestrasyonu.
+- `src/constants/routes.js`: Route sabitleri ve dashboard menu listesi.
+- `src/hooks/useWebRouter.js`: Web path yonetimi (`/home`, `/loginPage`, `/dashboard`).
+- `src/screens/`: Ekran bilesenleri (`HomeScreen`, `LoginPage`, `DashboardScreen`).
+- `src/components/dashboard/`: Dashboard'a ozel bilesenler (`DashboardNavbar`, `DashboardSidePanel`).
 
-## 🛠 Çalıştırma
-Projeyi web ortamında önizlemek için:
+## Komutlar
+Yerelde web:
 ```bash
-npx expo start --web
+npm install
+npm run web
 ```
-Docker üzerinde çalıştırmak için:
+
+Yerelde mobil:
 ```bash
-docker-compose up hackathon26-frontend
+npm run mobile
+```
+
+Tunnel ile mobil:
+```bash
+npm run mobile:tunnel
+```
+
+Docker web:
+```bash
+docker compose up -d --build hackathon26-frontend
+```
+
+Docker mobil:
+```bash
+docker compose up -d --build hackathon26-frontend-mobile
+docker compose logs -f hackathon26-frontend-mobile
 ```
