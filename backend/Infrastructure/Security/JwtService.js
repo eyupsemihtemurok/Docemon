@@ -6,7 +6,7 @@ class JwtService {
         const payload = {
             id: user.id,
             email: user.email,
-            ad_soyad: user.ad_soyad
+            full_name: user.full_name || user.fullName || user.ad_soyad || null
         };
         
         const secret = process.env.JWT_SECRET || 'hackathon26_super_secret_jwt_key';
