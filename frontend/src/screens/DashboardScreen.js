@@ -101,15 +101,7 @@ export default function DashboardScreen({ activeMenuItem }) {
                 <Text style={styles.liveText}>Canli izleme</Text>
               </View>
 
-              {dangerRelatives.length > 0 && (
-                <Pressable
-                  style={styles.affectedTrigger}
-                  onPress={() => setIsAffectedModalVisible(true)}
-                >
-                  <Text style={styles.affectedTriggerIcon}>⚠️</Text>
-                  <Text style={styles.affectedTriggerText}>Muhtemel Etkilenen Yakınlar ({dangerRelatives.length})</Text>
-                </Pressable>
-              )}
+              
             </View>
           </View>
 
