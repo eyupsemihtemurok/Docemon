@@ -5,6 +5,8 @@ import DashboardSidePanel from '../components/dashboard/DashboardSidePanel';
 import { DASHBOARD_MENU_ITEMS, ROUTES } from '../constants/routes';
 import useWebRouter from '../hooks/useWebRouter';
 import DashboardScreen from '../screens/DashboardScreen';
+import DisasterMapScreen from '../screens/DisasterMapScreen';
+import FaceMatchScreen from '../screens/FaceMatchScreen';
 import HomeScreen from '../screens/HomeScreen';
 import LoginPage from '../screens/LoginPage';
 import ProfileScreen from '../screens/ProfileScreen';

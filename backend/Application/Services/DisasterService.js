@@ -8,27 +8,34 @@ class DisasterService {
     }
 
     /**
-     * Creates a new disaster and updates status of users in the affected area
-     * @param {Object} disasterData 
-     * @param {string} creatorId 
+     * Creates a new disaster with multiple affected districts
+     * @param {Object} disasterData - { type, severity, location_name, description, province_id, districtIds: [] }
+     * @param {string} creatorId
      */
     async createDisaster(disasterData, creatorId) {
-        // 1. Create Disaster Entity
+        const { districtIds = [], ...rest } = disasterData;
+
+        if (!rest.province_id) {
+            throw new Error('province_id zorunludur.');
+        }
+        if (!rest.type) {
+            throw new Error('Afet türü (type) zorunludur.');
+        }
+
         const disaster = new Disaster({
-            ...disasterData,
+            ...rest,
             createdBy: creatorId,
             isActive: true,
-            startTime: new Date()
+            startTime: new Date(),
         });
 
-        // 2. Save Disaster to DB
-        const savedDisaster = await this.disasterRepository.create(disaster);
+        // Save disaster + districts to DB
+        const savedDisaster = await this.disasterRepository.create(disaster, districtIds);
 
-        // 3. Update Status of Users in the Province/District
-        // Users in the affected area are now marked as 'AFFECTED'
+        // Update safety status for users in the affected area
         await this.disasterRepository.updateUserStatusInArea(
-            disaster.provinceId,
-            disaster.districtId,
+            rest.province_id,
+            districtIds,
             UserStatus.AFFECTED
         );
 
