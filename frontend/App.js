@@ -1,5 +1,6 @@
 import { SafeAreaView, View, Text, Pressable, StyleSheet, Animated, Easing, Modal } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
+import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
 import ServicesPage from './pages/ServicesPage';
 import AppointmentsPage from './pages/AppointmentsPage';
@@ -14,6 +15,7 @@ const MENU_OPTIONS = [
 ];
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [active, setActive] = useState('home');
   const [menuOpen, setMenuOpen] = useState(false);
   const menuAnim = useRef(new Animated.Value(0)).current;
@@ -26,6 +28,14 @@ export default function App() {
   };
 
   const ActivePage = PAGES[active] || HomePage;
+
+  if (!isAuthenticated) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <AuthPage onAuthenticated={() => setIsAuthenticated(true)} />
+      </SafeAreaView>
+    );
+  }
 
   useEffect(() => {
     Animated.timing(menuAnim, {
