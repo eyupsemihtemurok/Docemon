@@ -6,7 +6,7 @@ class AuthService {
         this.userRepository = userRepository;
     }
 
-    async register({ nationalId, fullName, email, password, bloodType, chronicDiseases, birthDate, phone }) {
+    async register({ nationalId, fullName, email, password, bloodType, chronicDiseases, birthDate, phone, provinceId, districtId }) {
         const nationalIdHash = SecurityService.hashDeterministic(nationalId);
         
         const existingEmail = await this.userRepository.getByEmail(email);
@@ -26,6 +26,8 @@ class AuthService {
             chronic_diseases: chronicDiseases,
             birth_date: birthDate,
             phone,
+            province_id: provinceId,
+            district_id: districtId,
             is_active: true
         });
 
@@ -76,6 +78,9 @@ class AuthService {
         if (updateData.birthDate) mappedData.birth_date = updateData.birthDate;
         if (updateData.phone) mappedData.phone = updateData.phone;
         if (updateData.password) mappedData.password = updateData.password;
+        if (updateData.provinceId) mappedData.province_id = updateData.provinceId;
+        if (updateData.districtId) mappedData.district_id = updateData.districtId;
+        if (updateData.safetyStatus) mappedData.safety_status = updateData.safetyStatus;
 
         const updatedUser = await this.userRepository.update(userId, mappedData);
         const { password, national_id, ...profile } = updatedUser;

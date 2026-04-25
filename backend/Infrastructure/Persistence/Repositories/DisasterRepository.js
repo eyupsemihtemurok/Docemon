@@ -32,7 +32,7 @@ class DisasterRepository extends IDisasterRepository {
                 province_id: provinceId, 
                 district_id: districtId 
             })
-            .update({ status });
+            .update({ safety_status: status });
     }
 }
 

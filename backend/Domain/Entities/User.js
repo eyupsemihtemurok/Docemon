@@ -10,8 +10,10 @@ class User {
         birthDate,
         phone,
         faceData,
+        provinceId,
+        districtId,
         isActive = true,
-        status = 'SAFE', // Default status from UserStatus enum
+        safetyStatus = 'SAFE', // Default status from UserStatus enum
         createdAt = new Date(),
         updatedAt = new Date()
     } = {}) {
@@ -25,8 +27,10 @@ class User {
         this.birthDate = birthDate;
         this.phone = phone;
         this.faceData = faceData;
+        this.provinceId = provinceId;
+        this.districtId = districtId;
         this.isActive = isActive;
-        this.status = status;
+        this.safetyStatus = safetyStatus;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
