@@ -94,6 +94,8 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# AI Models (DeepFace)
-face-service/.deepface/
+# AI Models (DeepFace & TensorFlow)
+**/.deepface/
+**/weights/*.h5
+**/weights/*.pb
 face-service/temp_*
