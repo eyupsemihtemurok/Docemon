@@ -47,10 +47,6 @@ export default function AppRoot() {
 
       return (
         <View style={styles.dashboardWrapper}>
-          <DashboardNavbar
-            userName="Mete"
-            onProfilePress={() => navigate(ROUTES.PROFILE)}
-          />
           <DashboardScreen activeMenuItem={activeMenuItemLabel} />
           <DashboardSidePanel
             visible={isMenuOpen}
@@ -75,7 +71,17 @@ export default function AppRoot() {
     return null;
   };
 
-  return <SafeAreaView style={styles.root}>{renderPage()}</SafeAreaView>;
+  return (
+    <SafeAreaView style={styles.root}>
+      {path !== ROUTES.LOGIN && (
+        <DashboardNavbar
+          userName="Mete"
+          onProfilePress={() => navigate(ROUTES.PROFILE)}
+        />
+      )}
+      {renderPage()}
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
