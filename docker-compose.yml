@@ -1,0 +1,38 @@
+services:
+  hackathon26-sql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: hackathon26-sql
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=commitbirlikleri_hackathon26!
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+  hackathon26-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hackathon26-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=hackathon26-sql
+      - DB_USER=commitbirlikleri
+      - DB_PASSWORD=commitbirlikleri_hackathon26!
+    depends_on:
+      - hackathon26-sql
+
+  hackathon26-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hackathon26-frontend
+    ports:
+      - "19006:19006" # Expo Web portu
+    environment:
+      - API_URL=http://localhost:3000
+
+volumes:
+  mssql_data:
