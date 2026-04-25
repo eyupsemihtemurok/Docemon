@@ -541,8 +541,12 @@ export default StyleSheet.create({
   },
   fabIcon: {
     color: '#ffffff',
-    fontSize: 32,
+    fontSize: 40,
     fontWeight: '300',
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    includeFontPadding: false,
+    marginTop: -4, // Adjust for vertical centering of '+'
   },
   // Pill Menu Styles
   fabMenuOverlay: {
@@ -566,20 +570,21 @@ export default StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#ffffff',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     borderRadius: 30,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    borderColor: '#bbf7d0',
+    elevation: 6,
+    shadowColor: '#16a34a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
   },
   menuItemPillPrimary: {
     backgroundColor: '#15803d',
     borderColor: '#15803d',
+    shadowColor: '#15803d',
   },
   menuItemText: {
     color: '#334155',

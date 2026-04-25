@@ -5,6 +5,7 @@ const cors = require('cors');
 const authRoutes = require('./Presentation/Routes/authRoutes');
 const friendRoutes = require('./Presentation/Routes/friendRoutes');
 const biometricRoutes = require('./Presentation/Routes/biometricRoutes');
+const biometricCoreRoutes = require('./Presentation/Routes/biometricCoreRoutes');
 const geographyRoutes = require('./Presentation/Routes/geographyRoutes');
 const disasterRoutes = require('./Presentation/Routes/disasterRoutes');
 const { swaggerUi, specs } = require('./Presentation/Docs/swagger');
@@ -24,6 +25,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/api/auth', authRoutes);
 app.use('/api/friends', friendRoutes);
 app.use('/api/biometrics', biometricRoutes);
+app.use('/api/biometric', biometricCoreRoutes);
+app.use('/', biometricCoreRoutes);
 app.use('/api/geography', geographyRoutes);
 app.use('/api/disaster', disasterRoutes);
 

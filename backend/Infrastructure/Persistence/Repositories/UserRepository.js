@@ -16,6 +16,14 @@ class UserRepository extends IUserRepository {
         return await db(this.tableName).where({ email }).first();
     }
 
+    async getByNationalId(nationalIdHash) {
+        return await db(this.tableName).where({ national_id: nationalIdHash }).first();
+    }
+
+    async createUserWithEmbedding(userData) {
+        return await this.create(userData);
+    }
+
     async create(userData) {
         const id = userData.id || crypto.randomUUID();
 
@@ -41,7 +49,7 @@ class UserRepository extends IUserRepository {
         return await db(this.tableName)
             .whereIn('safety_status', ['UNREACHABLE', 'UNDER_DEBRIS'])
             .whereNotNull('face_embedding')
-            .select('id', 'face_embedding', 'full_name');
+            .select('id', 'face_embedding', 'full_name', 'email');
     }
 
     async createVerificationAlert(alertData) {
@@ -52,10 +60,23 @@ class UserRepository extends IUserRepository {
         return id;
     }
 
-    async getVerificationAlerts() {
-        return await db('verification_alert')
+    async getVerificationAlerts(status = null) {
+        const query = db('verification_alert')
             .join('user', 'verification_alert.user_id', '=', 'user.id')
-            .select('verification_alert.*', 'user.full_name', 'user.email');
+            .select(
+                'verification_alert.*',
+                'user.full_name',
+                'user.email',
+                'user.national_id',
+                'user.face_data',
+                'user.face_mime_type'
+            );
+
+        if (status) {
+            query.where('verification_alert.status', status);
+        }
+
+        return await query;
     }
 
     async updateVerificationStatus(alertId, status) {

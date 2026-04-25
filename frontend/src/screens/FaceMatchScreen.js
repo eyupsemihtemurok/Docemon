@@ -51,7 +51,7 @@ const STEPS = [
   { id: 3, label: 'Sonuçlar', icon: '✅', done: false, active: false },
 ];
 
-export default function FaceMatchScreen() {
+export default function FaceMatchScreen({ navigate }) {
   const [phase, setPhase] = useState('upload'); // upload | loading | results
   const [steps, setSteps] = useState(STEPS);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -85,6 +85,9 @@ export default function FaceMatchScreen() {
         <Text style={styles.headerSub}>
           Kurtarılan kişinin fotoğrafını yükleyerek kayıt sistemindeki kişilerle eşleştirin.
         </Text>
+        <Pressable onPress={() => navigate('/dashboard')} style={{ marginTop: 8 }}>
+          <Text style={{ color: '#15803d', fontWeight: '700' }}>← Dashboard'a Dön</Text>
+        </Pressable>
 
         {/* Adım göstergesi */}
         <View style={styles.stepsRow}>

@@ -82,6 +82,7 @@ class FriendRepository extends IFriendRepository {
                 'user.id as userId',
                 'user.full_name as fullName',
                 'user.phone',
+                'user.email',
                 'user.safety_status as safetyStatus'
             );
     }
