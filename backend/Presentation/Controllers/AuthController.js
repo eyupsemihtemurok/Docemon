@@ -8,7 +8,7 @@ class AuthController {
     static async register(req, res) {
         try {
             const user = await authService.register(req.body);
-            res.status(201).json({ message: 'Kullanıcı başarıyla kaydedildi.', user });
+            res.status(201).json({ message: 'User registered successfully.', user });
         } catch (err) {
             res.status(400).json({ error: err.message });
         }
@@ -16,8 +16,8 @@ class AuthController {
 
     static async login(req, res) {
         try {
-            const { email, sifre } = req.body;
-            const result = await authService.login(email, sifre);
+            const { email, password } = req.body;
+            const result = await authService.login(email, password);
             res.json(result);
         } catch (err) {
             res.status(401).json({ error: err.message });
@@ -36,7 +36,7 @@ class AuthController {
     static async updateProfile(req, res) {
         try {
             const updatedProfile = await authService.updateProfile(req.user.id, req.body);
-            res.json({ message: 'Profil başarıyla güncellendi.', profile: updatedProfile });
+            res.json({ message: 'Profile updated successfully.', profile: updatedProfile });
         } catch (err) {
             res.status(400).json({ error: err.message });
         }

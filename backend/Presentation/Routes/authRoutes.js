@@ -11,28 +11,27 @@ const router = express.Router();
  *     UserRegister:
  *       type: object
  *       required:
- *         - tc
- *         - ad_soyad
+ *         - nationalId
+ *         - fullName
  *         - email
- *         - sifre
+ *         - password
  *       properties:
- *         tc:
+ *         nationalId:
  *           type: string
- *           description: T.C. Kimlik Numarası
- *         ad_soyad:
+ *         fullName:
  *           type: string
  *         email:
  *           type: string
- *         sifre:
+ *         password:
  *           type: string
- *         kan_grubu:
+ *         bloodType:
  *           type: string
- *         kronik_hastaliklar:
+ *         chronicDiseases:
  *           type: string
- *         dogum_tarihi:
+ *         birthDate:
  *           type: string
  *           format: date
- *         telefon:
+ *         phone:
  *           type: string
  */
 
@@ -40,7 +39,7 @@ const router = express.Router();
  * @swagger
  * /api/auth/register:
  *   post:
- *     summary: Yeni kullanıcı kaydı oluşturur
+ *     summary: Register a new user
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -50,9 +49,7 @@ const router = express.Router();
  *             $ref: '#/components/schemas/UserRegister'
  *     responses:
  *       201:
- *         description: Kullanıcı başarıyla oluşturuldu
- *       400:
- *         description: Hatalı istek
+ *         description: User created
  */
 router.post('/register', AuthController.register);
 
@@ -60,7 +57,7 @@ router.post('/register', AuthController.register);
  * @swagger
  * /api/auth/login:
  *   post:
- *     summary: Kullanıcı girişi yapar ve JWT döner
+ *     summary: Login user and get JWT
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -70,17 +67,15 @@ router.post('/register', AuthController.register);
  *             type: object
  *             required:
  *               - email
- *               - sifre
+ *               - password
  *             properties:
  *               email:
  *                 type: string
- *               sifre:
+ *               password:
  *                 type: string
  *     responses:
  *       200:
- *         description: Başarılı giriş
- *       401:
- *         description: Yetkisiz erişim
+ *         description: Success
  */
 router.post('/login', AuthController.login);
 
@@ -88,15 +83,13 @@ router.post('/login', AuthController.login);
  * @swagger
  * /api/auth/me:
  *   get:
- *     summary: Mevcut kullanıcının profil bilgilerini getirir
+ *     summary: Get current user profile
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Profil bilgileri
- *       401:
- *         description: Yetkisiz
+ *         description: Profile data
  */
 router.get('/me', authMiddleware, AuthController.getMe);
 
@@ -104,7 +97,7 @@ router.get('/me', authMiddleware, AuthController.getMe);
  * @swagger
  * /api/auth/profile:
  *   put:
- *     summary: Kullanıcı profilini günceller
+ *     summary: Update user profile
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
@@ -116,7 +109,7 @@ router.get('/me', authMiddleware, AuthController.getMe);
  *             $ref: '#/components/schemas/UserRegister'
  *     responses:
  *       200:
- *         description: Profil güncellendi
+ *         description: Profile updated
  */
 router.put('/profile', authMiddleware, AuthController.updateProfile);
 
