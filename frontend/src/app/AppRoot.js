@@ -17,6 +17,8 @@ export default function AppRoot() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeMenuItemId, setActiveMenuItemId] = useState(DASHBOARD_MENU_ITEMS[0].id);
   const [isAuthReady, setIsAuthReady] = useState(false);
+  const [authToken, setAuthTokenState] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -32,14 +34,18 @@ export default function AppRoot() {
       }
 
       try {
-        await fetchCurrentUser(storedToken);
+        const profile = await fetchCurrentUser(storedToken);
         if (isMounted) {
+          setAuthTokenState(storedToken);
           setIsAuthenticated(true);
+          setCurrentUser(profile);
         }
       } catch {
         clearAuthToken();
         if (isMounted) {
           setIsAuthenticated(false);
+          setAuthTokenState(null);
+          setCurrentUser(null);
         }
       } finally {
         if (isMounted) {
@@ -63,9 +69,11 @@ export default function AppRoot() {
   const handleLogin = (authResult) => {
     if (authResult?.token) {
       setAuthToken(authResult.token);
+      setAuthTokenState(authResult.token);
     }
 
     setIsAuthenticated(true);
+    setCurrentUser(authResult?.user || null);
     replace(ROUTES.DASHBOARD);
   };
 
@@ -95,7 +103,11 @@ export default function AppRoot() {
 
       return (
         <View style={styles.dashboardWrapper}>
-          <DashboardScreen activeMenuItem={activeMenuItemLabel} />
+          <DashboardScreen
+            activeMenuItem={activeMenuItemLabel}
+            authToken={authToken}
+            currentUser={currentUser}
+          />
           <DashboardSidePanel
             visible={isMenuOpen}
             onClose={() => setIsMenuOpen(false)}
@@ -127,7 +139,7 @@ export default function AppRoot() {
     <SafeAreaView style={styles.root}>
       {path !== ROUTES.HOME && path !== ROUTES.LOGIN && (
         <DashboardNavbar
-          userName="Mete"
+          userName={currentUser?.full_name || currentUser?.fullName || currentUser?.email || 'Kullanıcı'}
           onProfilePress={() => navigate(ROUTES.PROFILE)}
         />
       )}

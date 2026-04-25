@@ -1,16 +1,27 @@
 class NetworkService {
-    constructor(friendRepository) {
+    constructor(friendRepository, userRepository) {
         this.friendRepository = friendRepository;
+        this.userRepository = userRepository;
     }
 
     async getFriends(userId) {
         return await this.friendRepository.getFriendsByUserId(userId);
     }
 
-    async sendFriendRequest(senderId, receiverEmail) {
-        // Not: Email ile kullanıcıyı bulma mantığı UserRepository'den gelmeli.
-        // Şimdilik basitleştirmek için receiverId beklediğimizi varsayalım veya UserRepository ekleyelim.
-        // Ama user kuralı gereği receiverId alalım.
+    async sendFriendRequest(senderId, receiverIdentifier) {
+        if (!receiverIdentifier) {
+            throw new Error('Receiver identifier is required.');
+        }
+
+        const receiver = receiverIdentifier.includes('@')
+            ? await this.userRepository.getByEmail(receiverIdentifier)
+            : await this.userRepository.getById(receiverIdentifier);
+
+        if (!receiver) {
+            throw new Error('Recipient not found.');
+        }
+
+        return await this.createRequest(senderId, receiver.id);
     }
 
     async createRequest(senderId, receiverId) {
@@ -44,6 +55,15 @@ class NetworkService {
 
         await this.friendRepository.updateRequestStatus(requestId, status);
         return { message: `Friend request ${status.toLowerCase()} successfully.` };
+    }
+
+    async getPendingRequests(userId) {
+        const requests = await this.friendRepository.getPendingRequestsByUserId(userId);
+
+        return requests.map((request) => ({
+            ...request,
+            direction: request.receiverId === userId ? 'incoming' : 'outgoing'
+        }));
     }
 
     async getEmergencyContacts(userId) {

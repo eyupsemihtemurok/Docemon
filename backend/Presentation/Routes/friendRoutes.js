@@ -8,6 +8,7 @@ const router = express.Router();
 router.use(authMiddleware);
 
 router.get('/', FriendController.getFriends);
+router.get('/requests', FriendController.getRequests);
 router.post('/request', FriendController.sendRequest);
 router.post('/respond', FriendController.respondRequest);
 router.get('/emergency-contacts', FriendController.getEmergencyContacts);

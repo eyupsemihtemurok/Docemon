@@ -8,8 +8,23 @@ class DisasterRepository extends IDisasterRepository {
     }
 
     async create(disasterData) {
-        const [id] = await db(this.tableName).insert(disasterData).returning('id');
-        return { ...disasterData, id };
+        const payload = {
+            type: disasterData.type,
+            severity: disasterData.severity,
+            location_name: disasterData.locationName ?? disasterData.location_name,
+            province_id: disasterData.provinceId ?? disasterData.province_id,
+            district_id: disasterData.districtId ?? disasterData.district_id,
+            latitude: disasterData.latitude,
+            longitude: disasterData.longitude,
+            description: disasterData.description,
+            created_by: disasterData.createdBy ?? disasterData.created_by,
+            start_time: disasterData.startTime ?? disasterData.start_time ?? db.fn.now(),
+            end_time: disasterData.endTime ?? disasterData.end_time,
+            is_active: disasterData.isActive ?? disasterData.is_active ?? true
+        };
+
+        const [id] = await db(this.tableName).insert(payload).returning('id');
+        return { ...payload, id };
     }
 
     async getById(id) {
@@ -17,7 +32,9 @@ class DisasterRepository extends IDisasterRepository {
     }
 
     async getAllActive() {
-        return await db(this.tableName).where({ isActive: true });
+        return await db(this.tableName)
+            .where({ is_active: true })
+            .orderBy('start_time', 'desc');
     }
 
     async update(id, disasterData) {

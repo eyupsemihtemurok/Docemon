@@ -72,11 +72,5 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     marginTop: -2,
   },
-  userName: {
-    color: '#052e16',
-    fontSize: 17,
-    fontWeight: '900',
-    marginTop: -2,
-  },
 });
 

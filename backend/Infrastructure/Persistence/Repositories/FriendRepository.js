@@ -43,6 +43,26 @@ class FriendRepository extends IFriendRepository {
         }).returning('id');
         return id;
     }
+    
+    async getPendingRequestsByUserId(userId) {
+        return await db({ f: this.tableName })
+            .join({ sender: 'user' }, 'f.sender_id', 'sender.id')
+            .join({ receiver: 'user' }, 'f.receiver_id', 'receiver.id')
+            .where(function() {
+                this.where('f.sender_id', userId).orWhere('f.receiver_id', userId);
+            })
+            .andWhere('f.status', 'PENDING')
+            .select(
+                'f.id as requestId',
+                'f.sender_id as senderId',
+                'f.receiver_id as receiverId',
+                'f.status',
+                'sender.full_name as senderName',
+                'sender.email as senderEmail',
+                'receiver.full_name as receiverName',
+                'receiver.email as receiverEmail'
+            );
+    }
 
     async getRequestById(requestId) {
         return await db(this.tableName).where({ id: requestId }).first();
