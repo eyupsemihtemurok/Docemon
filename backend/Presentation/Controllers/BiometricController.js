@@ -1,6 +1,7 @@
 const axios = require('axios');
 const FormData = require('form-data');
 const UserRepository = require('../../Infrastructure/Persistence/Repositories/UserRepository');
+const notificationService = require('../../Application/Services/NotificationService');
 
 const repo = new UserRepository();
 
@@ -92,6 +93,21 @@ class BiometricController {
                         image_id: req.file.originalname
                     });
                     matchCount++;
+
+                    // Yüz eşleşmesi bulundu → aileye "tespit edildi, onay bekleniyor" bildirimi gönder
+                    try {
+                        await notificationService.notifyFaceMatchDetected(
+                            target.id,
+                            target.full_name || 'Bilinmeyen kişi',
+                            {
+                                matchScore: score,
+                                healthDetails: req.body.healthDetails || 'Belirtilmedi',
+                                locationDetails: req.body.locationDetails || 'Belirtilmedi',
+                            }
+                        );
+                    } catch (notifErr) {
+                        console.warn('[BiometricController] Face match notification error:', notifErr.message);
+                    }
                 }
             }
 
@@ -115,8 +131,29 @@ class BiometricController {
             if (!['APPROVED', 'REJECTED'].includes(status)) throw new Error('Invalid status.');
 
             await repo.updateVerificationStatus(alertId, status);
-            
-            // Onaylandıysa aileye mail/bildirim tetiklenebilir (Gelecek faz)
+
+            // Onaylandıysa → aile/acil kişilere kurtarma bildirimi gönder
+            if (status === 'APPROVED') {
+                try {
+                    const alert = await repo.getVerificationAlerts();
+                    const thisAlert = alert.find(a => a.id === alertId);
+                    if (thisAlert) {
+                        await notificationService.notifyFamilyOfRescue(
+                            thisAlert.user_id,
+                            thisAlert.full_name || 'Bilinmeyen kişi',
+                            {
+                                healthStatus: thisAlert.health_details || 'Belirtilmedi',
+                                assemblyPoint: 'Kurtarma noktası',
+                                locationDetails: thisAlert.location_details || 'Belirtilmedi',
+                                disasterRegion: 'Afet bölgesi',
+                            }
+                        );
+                    }
+                } catch (notifErr) {
+                    console.warn('[BiometricController] Rescue notification error:', notifErr.message);
+                }
+            }
+
             res.json({ message: `Verification ${status.toLowerCase()} successfully.` });
         } catch (err) {
             res.status(400).json({ error: err.message });

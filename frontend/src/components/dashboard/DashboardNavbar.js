@@ -1,6 +1,7 @@
 import { Platform, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
+import NotificationBell from '../notifications/NotificationBell';
 
-export default function DashboardNavbar({ userName = 'Kullanıcı', onProfilePress }) {
+export default function DashboardNavbar({ userName = 'Kullanıcı', onProfilePress, authToken }) {
   return (
     <View style={styles.safeAreaContainer}>
       <View style={styles.container}>
@@ -14,6 +15,8 @@ export default function DashboardNavbar({ userName = 'Kullanıcı', onProfilePre
           </View>
         </Pressable>
 
+        {/* Notification Bell */}
+        <NotificationBell authToken={authToken} />
       </View>
     </View>
   );
