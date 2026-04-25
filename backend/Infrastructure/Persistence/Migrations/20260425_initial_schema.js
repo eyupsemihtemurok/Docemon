@@ -6,7 +6,6 @@ exports.up = async function(knex) {
     // 1. USER TABLE
     await knex.schema.createTable('user', (table) => {
         table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
-        table.string('national_id', 64).unique().notNullable();
         table.string('full_name', 100).notNullable();
         table.string('email', 100).unique().notNullable();
         table.string('password', 255).notNullable();

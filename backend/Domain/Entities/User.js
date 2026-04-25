@@ -1,7 +1,6 @@
 class User {
     constructor({
         id,
-        nationalId,
         fullName,
         email,
         password,
@@ -15,7 +14,6 @@ class User {
         updatedAt = new Date()
     } = {}) {
         this.id = id;
-        this.nationalId = nationalId;
         this.fullName = fullName;
         this.email = email;
         this.password = password;

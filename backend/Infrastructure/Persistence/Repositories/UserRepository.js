@@ -15,10 +15,6 @@ class UserRepository extends IUserRepository {
         return await db(this.tableName).where({ email }).first();
     }
 
-    async getByNationalId(nationalIdHash) {
-        return await db(this.tableName).where({ national_id: nationalIdHash }).first();
-    }
-
     async create(userData) {
         const [id] = await db(this.tableName).insert({
             ...userData,
@@ -55,7 +51,7 @@ class UserRepository extends IUserRepository {
     async getVerificationAlerts() {
         return await db('verification_alert')
             .join('user', 'verification_alert.user_id', '=', 'user.id')
-            .select('verification_alert.*', 'user.full_name', 'user.national_id');
+            .select('verification_alert.*', 'user.full_name', 'user.email');
     }
 
     async updateVerificationStatus(alertId, status) {

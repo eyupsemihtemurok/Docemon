@@ -11,13 +11,10 @@ const router = express.Router();
  *     UserRegister:
  *       type: object
  *       required:
- *         - nationalId
  *         - fullName
  *         - email
  *         - password
  *       properties:
- *         nationalId:
- *           type: string
  *         fullName:
  *           type: string
  *         email:

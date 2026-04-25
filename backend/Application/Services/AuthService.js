@@ -6,19 +6,13 @@ class AuthService {
         this.userRepository = userRepository;
     }
 
-    async register({ nationalId, fullName, email, password, bloodType, chronicDiseases, birthDate, phone }) {
-        const nationalIdHash = SecurityService.hashDeterministic(nationalId);
-        
+    async register({ fullName, email, password, bloodType, chronicDiseases, birthDate, phone }) {
         const existingEmail = await this.userRepository.getByEmail(email);
         if (existingEmail) throw new Error('Email already in use.');
-        
-        const existingTC = await this.userRepository.getByNationalId(nationalIdHash);
-        if (existingTC) throw new Error('National ID already registered.');
 
         const passwordHash = await SecurityService.hashPassword(password);
 
         const newUser = await this.userRepository.create({
-            national_id: nationalIdHash,
             full_name: fullName,
             email,
             password: passwordHash,
@@ -59,7 +53,7 @@ class AuthService {
         const user = await this.userRepository.getById(userId);
         if (!user) throw new Error('User not found.');
 
-        const { password, national_id, ...profile } = user;
+        const { password, ...profile } = user;
         return profile;
     }
 
@@ -78,7 +72,7 @@ class AuthService {
         if (updateData.password) mappedData.password = updateData.password;
 
         const updatedUser = await this.userRepository.update(userId, mappedData);
-        const { password, national_id, ...profile } = updatedUser;
+        const { password, ...profile } = updatedUser;
         return profile;
     }
 }
