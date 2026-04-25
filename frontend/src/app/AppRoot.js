@@ -8,6 +8,7 @@ import DashboardScreen from '../screens/DashboardScreen';
 import DisasterMapScreen from '../screens/DisasterMapScreen';
 import FaceMatchScreen from '../screens/FaceMatchScreen';
 import HomeScreen from '../screens/HomeScreen';
+import InformationPage from '../screens/InformationPage';
 import LoginPage from '../screens/LoginPage';
 import ProfileScreen from '../screens/ProfileScreen';
 import { fetchCurrentUser } from '../services/authApi';
@@ -109,6 +110,7 @@ export default function AppRoot() {
             activeMenuItem={activeMenuItemLabel}
             authToken={authToken}
             currentUser={currentUser}
+            navigate={navigate}
           />
           <DashboardSidePanel
             visible={isMenuOpen}
@@ -131,6 +133,19 @@ export default function AppRoot() {
         return null;
       }
       return <ProfileScreen navigate={navigate} />;
+    }
+
+    if (path === ROUTES.INFORMATION) {
+      if (!isAuthReady) {
+        return null;
+      }
+
+      if (!isAuthenticated) {
+        replace(ROUTES.LOGIN);
+        return null;
+      }
+
+      return <InformationPage navigate={navigate} />;
     }
 
     replace(ROUTES.HOME);

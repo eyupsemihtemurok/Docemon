@@ -27,48 +27,48 @@ export default function TurkeyMap() {
           <Text style={styles.mapSubTitle}>Gerçek zamanlı il sınırları ve bildirimler</Text>
         </View>
         <View style={styles.legend}>
-           <View style={styles.legendItem}>
-             <View style={[styles.dot, { backgroundColor: '#ef4444' }]} />
-             <Text style={styles.legendText}>Afet</Text>
-           </View>
-           <View style={styles.legendItem}>
-             <View style={[styles.dot, { backgroundColor: '#94a3b8' }]} />
-             <Text style={styles.legendText}>Norrmal</Text>
-           </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.dot, { backgroundColor: '#ef4444' }]} />
+            <Text style={styles.legendText}>Afet</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.dot, { backgroundColor: '#94a3b8' }]} />
+            <Text style={styles.legendText}>Norrmal</Text>
+          </View>
         </View>
       </View>
-      
+
       <View style={styles.mapFrame}>
-         {/* Harita Arka Planı */}
-         <Image 
-            source={{ uri: TURKEY_BASE_MAP }}
-            style={styles.mapImage}
-            resizeMode="contain"
-            onLoadError={() => console.log('Harita yuklenemedi')}
-         />
-         
-         {/* Etkileşim Katmanı */}
-         <View style={styles.overlay}>
-            {PROVINCES_81.map((city) => (
-              <Pressable
-                key={city.id}
-                style={[
-                  styles.cityPoint, 
-                  { left: city.x, top: city.y },
-                  city.hasDisaster && styles.disasterPoint,
-                  selectedCity?.id === city.id && styles.selectedPoint
-                ]}
-                onPress={() => setSelectedCity(city)}
-              >
-                {city.hasDisaster && <View style={styles.pulseRing} />}
-                {selectedCity?.id === city.id && (
-                   <View style={styles.labelContainer}>
-                      <Text style={styles.labelText}>{city.name}</Text>
-                   </View>
-                )}
-              </Pressable>
-            ))}
-         </View>
+        {/* Harita Arka Planı */}
+        <Image
+          source={{ uri: TURKEY_BASE_MAP }}
+          style={styles.mapImage}
+          resizeMode="contain"
+          onLoadError={() => console.log('Harita yuklenemedi')}
+        />
+
+        {/* Etkileşim Katmanı */}
+        <View style={styles.overlay}>
+          {PROVINCES_81.map((city) => (
+            <Pressable
+              key={city.id}
+              style={[
+                styles.cityPoint,
+                { left: city.x, top: city.y },
+                city.hasDisaster && styles.disasterPoint,
+                selectedCity?.id === city.id && styles.selectedPoint
+              ]}
+              onPress={() => setSelectedCity(city)}
+            >
+              {city.hasDisaster && <View style={styles.pulseRing} />}
+              {selectedCity?.id === city.id && (
+                <View style={styles.labelContainer}>
+                  <Text style={styles.labelText}>{city.name}</Text>
+                </View>
+              )}
+            </Pressable>
+          ))}
+        </View>
       </View>
 
       {selectedCity ? (
@@ -84,9 +84,9 @@ export default function TurkeyMap() {
               <Text style={styles.alertHeader}>🚨 KRİTİK AFET BİLDİRİMİ</Text>
               <Text style={styles.alertSub}>Bu il sınırları içinde yüksek öncelikli kurtarma çalışmaları mevcuttur.</Text>
               <View style={styles.miniStats}>
-                 <View style={styles.miniStatItem}><Text style={styles.miniStatVal}>45</Text><Text style={styles.miniStatLabel}>Ekip</Text></View>
-                 <View style={styles.miniStatItem}><Text style={styles.miniStatVal}>12</Text><Text style={styles.miniStatLabel}>Merkez</Text></View>
-                 <View style={styles.miniStatItem}><Text style={styles.miniStatVal}>850</Text><Text style={styles.miniStatLabel}>İhbar</Text></View>
+                <View style={styles.miniStatItem}><Text style={styles.miniStatVal}>45</Text><Text style={styles.miniStatLabel}>Ekip</Text></View>
+                <View style={styles.miniStatItem}><Text style={styles.miniStatVal}>12</Text><Text style={styles.miniStatLabel}>Merkez</Text></View>
+                <View style={styles.miniStatItem}><Text style={styles.miniStatVal}>850</Text><Text style={styles.miniStatLabel}>İhbar</Text></View>
               </View>
             </View>
           ) : (

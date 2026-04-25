@@ -3,6 +3,7 @@ export const ROUTES = {
   LOGIN: '/loginPage',
   DASHBOARD: '/dashboard',
   PROFILE: '/profile',
+  INFORMATION: '/information',
 };
 
 export const DASHBOARD_MENU_ITEMS = [

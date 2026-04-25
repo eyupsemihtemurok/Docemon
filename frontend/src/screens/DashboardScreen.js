@@ -10,6 +10,7 @@ import {
   updateEmergencyContact,
   uploadRescuePhoto,
 } from '../services/dashboardApi';
+import { ROUTES } from '../constants/routes';
 import styles from './styles/DashboardScreen.styles';
 
 function formatDisasterLocation(disaster) {
@@ -27,7 +28,7 @@ function getUserDisplayName(user) {
   return user.full_name || user.fullName || user.email || 'Kullanıcı';
 }
 
-export default function DashboardScreen({ activeMenuItem, authToken, currentUser }) {
+export default function DashboardScreen({ activeMenuItem, authToken, currentUser, navigate }) {
   const [friends, setFriends] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [activeDisasters, setActiveDisasters] = useState([]);
@@ -483,7 +484,15 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
             <Text style={styles.menuItemIcon}>📶</Text>
           </Pressable>
 
-          <Pressable style={styles.menuItemPill} onPress={() => setIsFabMenuVisible(false)}>
+          <Pressable
+            style={styles.menuItemPill}
+            onPress={() => {
+              setIsFabMenuVisible(false);
+              if (navigate) {
+                navigate(ROUTES.INFORMATION);
+              }
+            }}
+          >
             <Text style={styles.menuItemText}>Bilgilendirme Paneli</Text>
             <Text style={styles.menuItemIcon}>ℹ️</Text>
           </Pressable>
