@@ -33,6 +33,8 @@ services:
       - "19006:19006" # Expo Web portu
     environment:
       - API_URL=http://localhost:3000
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -50,6 +52,8 @@ services:
     environment:
       - API_URL=http://localhost:3000
       - REACT_NATIVE_PACKAGER_HOSTNAME=${EXPO_HOST_IP:-192.168.125.171}
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
     volumes:
       - ./frontend:/app
       - /app/node_modules
