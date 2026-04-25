@@ -96,6 +96,5 @@ Desktop.ini
 
 # AI Models (DeepFace & TensorFlow)
 **/.deepface/
-**/weights/*.h5
-**/weights/*.pb
+**/weights/**
 face-service/temp_*
