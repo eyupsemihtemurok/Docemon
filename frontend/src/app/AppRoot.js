@@ -7,6 +7,7 @@ import useWebRouter from '../hooks/useWebRouter';
 import DashboardScreen from '../screens/DashboardScreen';
 import HomeScreen from '../screens/HomeScreen';
 import LoginPage from '../screens/LoginPage';
+import RegisterPage from '../screens/RegisterPage';
 
 export default function AppRoot() {
   const { path, navigate, replace } = useWebRouter();
@@ -35,7 +36,11 @@ export default function AppRoot() {
     }
 
     if (path === ROUTES.LOGIN) {
-      return <LoginPage onLogin={handleLogin} />;
+      return <LoginPage onLogin={handleLogin} navigate={navigate} />;
+    }
+
+    if (path === ROUTES.REGISTER) {
+      return <RegisterPage onRegister={() => navigate(ROUTES.LOGIN)} navigate={navigate} />;
     }
 
     if (path === ROUTES.DASHBOARD) {
