@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import DashboardNavbar from '../components/dashboard/DashboardNavbar';
 import DashboardSidePanel from '../components/dashboard/DashboardSidePanel';
 import { DASHBOARD_MENU_ITEMS, ROUTES } from '../constants/routes';
@@ -11,6 +12,9 @@ import HomeScreen from '../screens/HomeScreen';
 import LoginPage from '../screens/LoginPage';
 import NotificationsScreen from '../screens/NotificationsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import RegisterScreen from '../screens/RegisterScreen';
+import RescueScannerScreen from '../screens/RescueScannerScreen';
+import OperatorDashboardScreen from '../screens/OperatorDashboardScreen';
 import { fetchCurrentUser } from '../services/authApi';
 import { clearAuthToken, getAuthToken, setAuthToken } from '../services/authStorage';
 
@@ -81,8 +85,13 @@ export default function AppRoot() {
   };
 
   const handleMenuSelect = (itemId) => {
+    const selectedItem = DASHBOARD_MENU_ITEMS.find((item) => item.id === itemId);
     setActiveMenuItemId(itemId);
     setIsMenuOpen(false);
+
+    if (selectedItem?.route) {
+      navigate(selectedItem.route);
+    }
   };
 
   const renderPage = () => {
@@ -110,6 +119,7 @@ export default function AppRoot() {
             activeMenuItem={activeMenuItemLabel}
             authToken={authToken}
             currentUser={currentUser}
+            navigate={navigate}
           />
           <DashboardSidePanel
             visible={isMenuOpen}
@@ -120,6 +130,32 @@ export default function AppRoot() {
           />
         </View>
       );
+    }
+
+    if (path === ROUTES.DISASTER_MAP) {
+      if (!isAuthReady) {
+        return null;
+      }
+
+      if (!isAuthenticated) {
+        replace(ROUTES.LOGIN);
+        return null;
+      }
+
+      return <DisasterMapScreen navigate={navigate} />;
+    }
+
+    if (path === ROUTES.FACE_MATCH) {
+      if (!isAuthReady) {
+        return null;
+      }
+
+      if (!isAuthenticated) {
+        replace(ROUTES.LOGIN);
+        return null;
+      }
+
+      return <FaceMatchScreen navigate={navigate} />;
     }
 
     if (path === ROUTES.PROFILE) {
@@ -134,13 +170,34 @@ export default function AppRoot() {
       return <ProfileScreen navigate={navigate} />;
     }
 
-    if (path === ROUTES.NOTIFICATIONS) {
-      if (!isAuthReady) return null;
+    if (path === ROUTES.BIOMETRIC_REGISTER) {
+      return <RegisterScreen navigate={navigate} />;
+    }
+
+    if (path === ROUTES.BIOMETRIC_RESCUE) {
+      if (!isAuthReady) {
+        return null;
+      }
+
       if (!isAuthenticated) {
         replace(ROUTES.LOGIN);
         return null;
       }
-      return <NotificationsScreen authToken={authToken} />;
+
+      return <RescueScannerScreen navigate={navigate} authToken={authToken} />;
+    }
+
+    if (path === ROUTES.BIOMETRIC_OPERATOR) {
+      if (!isAuthReady) {
+        return null;
+      }
+
+      if (!isAuthenticated) {
+        replace(ROUTES.LOGIN);
+        return null;
+      }
+
+      return <OperatorDashboardScreen navigate={navigate} authToken={authToken} />;
     }
 
     replace(ROUTES.HOME);
@@ -149,7 +206,7 @@ export default function AppRoot() {
 
   return (
     <SafeAreaView style={styles.root}>
-      {path !== ROUTES.HOME && path !== ROUTES.LOGIN && (
+      {path !== ROUTES.HOME && path !== ROUTES.LOGIN && path !== ROUTES.BIOMETRIC_REGISTER && (
         <DashboardNavbar
           userName={currentUser?.full_name || currentUser?.fullName || currentUser?.email || 'Kullanıcı'}
           onProfilePress={() => navigate(ROUTES.PROFILE)}

@@ -18,6 +18,7 @@ class AuthService {
         const passwordHash = await SecurityService.hashPassword(password);
 
         const newUser = await this.userRepository.create({
+            national_id: nationalIdHash,
             full_name: fullName,
             email,
             password: passwordHash,

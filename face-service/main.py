@@ -2,8 +2,8 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from deepface import DeepFace
 import os
 import shutil
+import tempfile
 import numpy as np
-import cv2
 
 app = FastAPI(title="Hackathon26 Face Service")
 
@@ -23,17 +23,20 @@ async def load_models():
             detector_backend="retinaface", 
             enforce_detection=False
         )
+        # Gelecek fazda AdaFace + RetinaFace kombinasyonuna geçilebilir.
         print(">>> Başarılı: Tüm modeller hazır ve projenizdeki .deepface klasörüne kaydedildi.")
     except Exception as e:
         print(f">>> Hata: Modeller indirilirken sorun oluştu: {str(e)}")
 
 @app.post("/extract-embedding")
 async def extract_embedding(file: UploadFile = File(...)):
-    temp_file = f"temp_{file.filename}"
-    with open(temp_file, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    temp_file = None
     
     try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1] or ".jpg") as tmp:
+            temp_file = tmp.name
+            shutil.copyfileobj(file.file, tmp)
+
         results = DeepFace.represent(
             img_path=temp_file,
             model_name="Facenet512",
@@ -48,7 +51,7 @@ async def extract_embedding(file: UploadFile = File(...)):
         print(f"Error: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Face detection failed: {str(e)}")
     finally:
-        if os.path.exists(temp_file):
+        if temp_file and os.path.exists(temp_file):
             os.remove(temp_file)
 
 @app.get("/health")

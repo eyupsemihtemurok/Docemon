@@ -4,29 +4,17 @@ import {
   StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import TurkeyMapWebView from '../components/dashboard/TurkeyMapWebView';
+import { getApiBaseUrl, requestJson } from '../services/httpClient';
 
-const API_BASE = 'http://localhost:3000';
-const FALLBACK  = 'http://192.168.125.59:3000';
+async function apiFetch(path, opts = {}) {
+  return requestJson(path, opts);
+}
 
 const DISASTER_TYPES = ['Deprem', 'Sel', 'Yangın', 'Fırtına', 'Heyelan', 'Tsunami', 'Çığ'];
 
-async function apiFetch(path, opts = {}) {
-  let res;
-  try {
-    res = await fetch(`${API_BASE}${path}`, opts);
-  } catch {
-    res = await fetch(`${FALLBACK}${path}`, opts);
-  }
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `HTTP ${res.status}`);
-  }
-  return res.json();
-}
-
 function pad2(n) { return String(Number(n)).padStart(2, '0'); }
 
-export default function DisasterMapScreen() {
+export default function DisasterMapScreen({ navigate }) {
   const [disasters,      setDisasters]      = useState([]);
   const [loadingMap,     setLoadingMap]     = useState(true);
   const [provinces,      setProvinces]      = useState([]);
@@ -140,6 +128,9 @@ export default function DisasterMapScreen() {
               <Text style={s.eyebrow}>AFET YÖNETİM SİSTEMİ</Text>
               <Text style={s.title}>Türkiye Afet Takip Haritası</Text>
               <Text style={s.sub}>Veritabanındaki aktif afet bölgeleri haritaya yansır</Text>
+              <Pressable onPress={() => navigate('/dashboard')} style={{ marginTop: 8 }}>
+                <Text style={{ color: '#15803d', fontWeight: '700' }}>← Dashboard'a Dön</Text>
+              </Pressable>
             </View>
             <View style={{ alignItems: 'flex-end', gap: 8 }}>
               <View style={s.liveBadge}><View style={s.liveDot}/><Text style={s.liveText}>CANLI</Text></View>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { ROUTES } from '../constants/routes';
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import {
@@ -181,7 +182,7 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: false,
       quality: 0.9,
       cameraType: ImagePicker.CameraType.back,
@@ -592,14 +593,48 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
 
       {isFabMenuVisible && (
         <View style={styles.fabMenu}>
-          <Pressable style={styles.menuItemPill} onPress={() => setIsFabMenuVisible(false)}>
-            <Text style={styles.menuItemText}>Bluetooth Mesh</Text>
-            <Text style={styles.menuItemIcon}>📶</Text>
+          <Pressable
+            style={styles.menuItemPill}
+            onPress={() => {
+              setIsFabMenuVisible(false);
+              navigate(ROUTES.BIOMETRIC_RESCUE);
+            }}
+          >
+            <Text style={styles.menuItemText}>Saha Tanılama</Text>
+            <Text style={styles.menuItemIcon}>📸</Text>
           </Pressable>
 
-          <Pressable style={styles.menuItemPill} onPress={() => setIsFabMenuVisible(false)}>
-            <Text style={styles.menuItemText}>Bilgilendirme Paneli</Text>
-            <Text style={styles.menuItemIcon}>ℹ️</Text>
+          <Pressable
+            style={styles.menuItemPill}
+            onPress={() => {
+              setIsFabMenuVisible(false);
+              navigate(ROUTES.BIOMETRIC_REGISTER);
+            }}
+          >
+            <Text style={styles.menuItemText}>Yeni Kayıt</Text>
+            <Text style={styles.menuItemIcon}>👤</Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.menuItemPill}
+            onPress={() => {
+              setIsFabMenuVisible(false);
+              navigate(ROUTES.BIOMETRIC_OPERATOR);
+            }}
+          >
+            <Text style={styles.menuItemText}>Operatör Paneli</Text>
+            <Text style={styles.menuItemIcon}>🖥️</Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.menuItemPill}
+            onPress={() => {
+              setIsFabMenuVisible(false);
+              navigate(ROUTES.DISASTER_MAP);
+            }}
+          >
+            <Text style={styles.menuItemText}>Afet Haritası</Text>
+            <Text style={styles.menuItemIcon}>🗺️</Text>
           </Pressable>
 
           <Pressable
@@ -608,8 +643,8 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
               setIsFabMenuVisible(false);
             }}
           >
-            <Text style={[styles.menuItemText, styles.menuItemTextPrimary]}>Kayıp Şüphesi</Text>
-            <Text style={styles.menuItemIcon}>🔍</Text>
+            <Text style={[styles.menuItemText, styles.menuItemTextPrimary]}>Bluetooth Mesh</Text>
+            <Text style={styles.menuItemIcon}>📶</Text>
           </Pressable>
         </View>
       )}
