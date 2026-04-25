@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const authRoutes = require('./Presentation/Routes/authRoutes');
 const friendRoutes = require('./Presentation/Routes/friendRoutes');
+const biometricRoutes = require('./Presentation/Routes/biometricRoutes');
 const { swaggerUi, specs } = require('./Presentation/Docs/swagger');
 
 const app = express();
@@ -20,6 +21,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/friends', friendRoutes);
+app.use('/api/biometrics', biometricRoutes);
 
 // Health Check
 app.use('/health', (req, res) => {
