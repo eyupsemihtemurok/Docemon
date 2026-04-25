@@ -7,6 +7,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web --port 19006",
+    "mobile": "expo start --port 8081",
+    "mobile:tunnel": "expo start --tunnel --port 8081",
     "tunnel": "expo start --tunnel"
   },
   "dependencies": {
