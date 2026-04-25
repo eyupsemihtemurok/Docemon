@@ -12,6 +12,16 @@ const config = {
     }
 };
 
+const migrationNameMap = {
+    '20260425_initial_schema.js': '20260425_0001_initial_schema.js',
+    '20260425_add_biometric_fields.js': '20260425_0002_add_biometric_fields.js',
+    '20260425_add_safety_and_emergency_fields.js': '20260425_0004_add_safety_and_emergency_fields.js'
+};
+
+function escapeSqlString(value) {
+    return value.replace(/'/g, "''");
+}
+
 async function initDb() {
     const dbName = process.env.DB_NAME || 'hackathon26';
     
@@ -31,6 +41,32 @@ async function initDb() {
                 PRINT 'Veritabanı zaten mevcut.';
             END
         `);
+
+        // Legacy migration adlari yeni dosya adlarina gecince Knex "directory is corrupt" hatasi verir.
+        const escapedDbName = dbName.replace(/]/g, ']]');
+        const hasMigrationTableResult = await pool.request().query(`
+            SELECT 1 AS has_table
+            FROM [${escapedDbName}].sys.tables
+            WHERE name = 'knex_migrations'
+        `);
+
+        if (hasMigrationTableResult.recordset.length > 0) {
+            for (const [oldName, newName] of Object.entries(migrationNameMap)) {
+                const oldEscaped = escapeSqlString(oldName);
+                const newEscaped = escapeSqlString(newName);
+
+                await pool.request().query(`
+                    UPDATE [${escapedDbName}].[dbo].[knex_migrations]
+                    SET [name] = '${newEscaped}'
+                    WHERE [name] = '${oldEscaped}'
+                      AND NOT EXISTS (
+                        SELECT 1
+                        FROM [${escapedDbName}].[dbo].[knex_migrations]
+                        WHERE [name] = '${newEscaped}'
+                      )
+                `);
+            }
+        }
         
         await pool.close();
         console.log('Veritabanı hazırlığı tamamlandı.');

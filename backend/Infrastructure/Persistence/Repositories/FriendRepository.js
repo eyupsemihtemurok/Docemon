@@ -8,12 +8,9 @@ class FriendRepository extends IFriendRepository {
     }
 
     async getFriendsByUserId(userId) {
-        // Hem gönderen hem alan tarafta olduğumuz onaylanmış arkadaşlıklar
+        // Kullanıcının bulunduğu arkadaşlıklarda karşı taraf kullanıcı kaydını getir.
         return await db(this.tableName)
-            .join('user', function() {
-                this.on('friend.sender_id', '=', 'user.id').andOn('friend.receiver_id', '!=', db.raw('?', [userId]))
-                .orOn('friend.receiver_id', '=', 'user.id').andOn('friend.sender_id', '!=', db.raw('?', [userId]))
-            })
+            .join('user', 'user.id', db.raw('CASE WHEN friend.sender_id = ? THEN friend.receiver_id ELSE friend.sender_id END', [userId]))
             .where(function() {
                 this.where('friend.sender_id', userId).orWhere('friend.receiver_id', userId);
             })
@@ -74,10 +71,7 @@ class FriendRepository extends IFriendRepository {
 
     async getEmergencyContacts(userId) {
         return await db(this.tableName)
-            .join('user', function() {
-                this.on('friend.sender_id', '=', 'user.id').andOn('friend.receiver_id', '!=', db.raw('?', [userId]))
-                .orOn('friend.receiver_id', '=', 'user.id').andOn('friend.sender_id', '!=', db.raw('?', [userId]))
-            })
+            .join('user', 'user.id', db.raw('CASE WHEN friend.sender_id = ? THEN friend.receiver_id ELSE friend.sender_id END', [userId]))
             .where(function() {
                 this.where('friend.sender_id', userId).orWhere('friend.receiver_id', userId);
             })

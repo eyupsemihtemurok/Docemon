@@ -22,3 +22,23 @@ export function fetchCurrentUser(token) {
     },
   });
 }
+
+function authHeaders(token) {
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+export function fetchFriends(token) {
+  return requestJson('/api/friends', {
+    method: 'GET',
+    headers: authHeaders(token),
+  });
+}
+
+export function fetchEmergencyContacts(token) {
+  return requestJson('/api/friends/emergency-contacts', {
+    method: 'GET',
+    headers: authHeaders(token),
+  });
+}
