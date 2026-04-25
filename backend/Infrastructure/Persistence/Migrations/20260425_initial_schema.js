@@ -3,84 +3,70 @@
  * @returns { Promise<void> }
  */
 exports.up = async function(knex) {
-    await knex.raw(`
-        -- 1. USER TABLOSU
-        CREATE TABLE [user] (
-            id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(), 
-            tc NVARCHAR(64) UNIQUE NOT NULL,     
-            ad_soyad NVARCHAR(100) NOT NULL,
-            email NVARCHAR(100) UNIQUE NOT NULL,
-            sifre NVARCHAR(255) NOT NULL,
-            yuz_verisi NVARCHAR(MAX),
-            aktiflik BIT DEFAULT 1, 
-            kayit_tarihi DATETIME2 DEFAULT GETUTCDATE(),        
-            guncelleme_tarihi DATETIME2 DEFAULT GETUTCDATE()         
-        );
-    `);
+    // 1. USER TABLOSU
+    await knex.schema.createTable('user', (table) => {
+        table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
+        table.string('tc', 64).unique().notNullable();
+        table.string('ad_soyad', 100).notNullable();
+        table.string('email', 100).unique().notNullable();
+        table.string('sifre', 255).notNullable();
+        table.text('yuz_verisi');
+        table.boolean('aktiflik').defaultTo(true);
+        table.datetime('kayit_tarihi', { precision: 2 }).defaultTo(knex.fn.now());
+        table.datetime('guncelleme_tarihi', { precision: 2 }).defaultTo(knex.fn.now());
+    });
 
-    await knex.raw(`
-        -- 2. ROL TABLOSU
-        CREATE TABLE rol (
-            id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-            ad NVARCHAR(50) UNIQUE NOT NULL
-        );
-    `);
+    // 2. ROL TABLOSU
+    await knex.schema.createTable('rol', (table) => {
+        table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
+        table.string('ad', 50).unique().notNullable();
+    });
 
-    await knex.raw(`
-        -- 3. USER_ROL TABLOSU
-        CREATE TABLE user_rol (
-            user_id UNIQUEIDENTIFIER FOREIGN KEY REFERENCES [user](id),
-            rol_id UNIQUEIDENTIFIER FOREIGN KEY REFERENCES rol(id),
-            PRIMARY KEY (user_id, rol_id) 
-        );
-    `);
+    // 3. USER_ROL TABLOSU
+    await knex.schema.createTable('user_rol', (table) => {
+        table.uuid('user_id').references('id').inTable('user').onDelete('CASCADE');
+        table.uuid('rol_id').references('id').inTable('rol').onDelete('CASCADE');
+        table.primary(['user_id', 'rol_id']);
+    });
 
-    await knex.raw(`
-        -- 4. KONUM TABLOSU
-        CREATE TABLE konum (
-            id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-            user_id UNIQUEIDENTIFIER FOREIGN KEY REFERENCES [user](id), 
-            enlem DECIMAL(10, 8),                         
-            boylam DECIMAL(11, 8),                        
-            sehir NVARCHAR(50),                               
-            tarih DATETIME2 DEFAULT GETUTCDATE()
-        );
-    `);
+    // 4. KONUM TABLOSU
+    await knex.schema.createTable('konum', (table) => {
+        table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
+        table.uuid('user_id').references('id').inTable('user').onDelete('CASCADE');
+        table.decimal('enlem', 10, 8);
+        table.decimal('boylam', 11, 8);
+        table.string('sehir', 50);
+        table.datetime('tarih', { precision: 2 }).defaultTo(knex.fn.now());
+    });
 
-    await knex.raw(`
-        -- 5. LOG TABLOSU
-        CREATE TABLE log (
-            id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-            user_id UNIQUEIDENTIFIER FOREIGN KEY REFERENCES [user](id), 
-            olay_tipi NVARCHAR(100) NOT NULL,                         
-            detay NVARCHAR(MAX),                              
-            tarih DATETIME2 DEFAULT GETUTCDATE()
-        );
-    `);
+    // 5. LOG TABLOSU
+    await knex.schema.createTable('log', (table) => {
+        table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
+        table.uuid('user_id').references('id').inTable('user').onDelete('SET NULL');
+        table.string('olay_tipi', 100).notNullable();
+        table.text('detay');
+        table.datetime('tarih', { precision: 2 }).defaultTo(knex.fn.now());
+    });
 
-    await knex.raw(`
-        -- 6. BİLDİRİM TABLOSU
-        CREATE TABLE bildirim (
-            id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-            user_id UNIQUEIDENTIFIER FOREIGN KEY REFERENCES [user](id), 
-            baslik NVARCHAR(100) NOT NULL,                             
-            mesaj NVARCHAR(500) NOT NULL,                           
-            tip NVARCHAR(50) NOT NULL,                              
-            okundu BIT DEFAULT 0,                                     
-            tarih DATETIME2 DEFAULT GETUTCDATE()
-        );
-    `);
+    // 6. BİLDİRİM TABLOSU
+    await knex.schema.createTable('bildirim', (table) => {
+        table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
+        table.uuid('user_id').references('id').inTable('user').onDelete('CASCADE');
+        table.string('baslik', 100).notNullable();
+        table.string('mesaj', 500).notNullable();
+        table.string('tip', 50).notNullable();
+        table.boolean('okundu').defaultTo(false);
+        table.datetime('tarih', { precision: 2 }).defaultTo(knex.fn.now());
+    });
 
-    await knex.raw(`
-        -- 7. ARKADAŞ TABLOSU
-        CREATE TABLE arkadas (
-            id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-            istek_atan_id UNIQUEIDENTIFIER FOREIGN KEY REFERENCES [user](id), 
-            istek_alan_id UNIQUEIDENTIFIER FOREIGN KEY REFERENCES [user](id), 
-            durum NVARCHAR(20) DEFAULT 'BEKLIYOR',                         
-            tarih DATETIME2 DEFAULT GETUTCDATE()
-        );
-    `);
+    // 7. ARKADAŞ TABLOSU
+    await knex.schema.createTable('arkadas', (table) => {
+        table.uuid('id').primary().defaultTo(knex.raw('NEWID()'));
+        table.uuid('istek_atan_id').references('id').inTable('user').onDelete('NO ACTION');
+        table.uuid('istek_alan_id').references('id').inTable('user').onDelete('NO ACTION');
+        table.string('durum', 20).defaultTo('BEKLIYOR');
+        table.datetime('tarih', { precision: 2 }).defaultTo(knex.fn.now());
+    });
 };
 
 /**
@@ -88,11 +74,12 @@ exports.up = async function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function(knex) {
-    await knex.raw('DROP TABLE IF EXISTS arkadas');
-    await knex.raw('DROP TABLE IF EXISTS bildirim');
-    await knex.raw('DROP TABLE IF EXISTS log');
-    await knex.raw('DROP TABLE IF EXISTS konum');
-    await knex.raw('DROP TABLE IF EXISTS user_rol');
-    await knex.raw('DROP TABLE IF EXISTS rol');
-    await knex.raw('DROP TABLE IF EXISTS [user]');
+    await knex.schema.dropTableIfExists('arkadas');
+    await knex.schema.dropTableIfExists('bildirim');
+    await knex.schema.dropTableIfExists('log');
+    await knex.schema.dropTableIfExists('konum');
+    await knex.schema.dropTableIfExists('user_rol');
+    await knex.schema.dropTableIfExists('rol');
+    await knex.schema.dropTableIfExists('user');
 };
+
