@@ -56,53 +56,18 @@ services:
       dockerfile: Dockerfile
     container_name: hackathon26-frontend
     ports:
+      - "8081:8081"
       - "19006:19006"
     environment:
-      - API_URL=http://localhost:3000
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    command: npm run web
-
-  hackathon26-frontend-mobile:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: hackathon26-frontend-mobile
-    ports:
-      - "8081:8081"   # Metro
-      - "19000:19000" # Expo Go
-      - "19001:19001" # Expo DevTools
-    environment:
-      - API_URL=http://localhost:3000
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    command: npm run mobile:tunnel
+      - API_URL=http://192.168.125.59:3000
+      - NODE_ENV=development
+      - REACT_NATIVE_PACKAGER_HOSTNAME=192.168.125.59
+    depends_on:
+      - hackathon26-backend
     stdin_open: true
     tty: true
-    depends_on:
-      - hackathon26-backend
-
-  hackathon26-info:
-    image: alpine
-    container_name: hackathon26-info
-    depends_on:
-      - hackathon26-backend
-      - hackathon26-frontend
-      - hackathon26-frontend-mobile
-    command: >
-      sh -c "echo ' ' &&
-             echo '================================================' &&
-             echo '🚀 hackathon26 PROJESİ BAŞARIYLA BAŞLATILDI!' &&
-             echo '================================================' &&
-             echo ' ' &&
-             echo '🌐 Frontend (Web): http://localhost:19006' &&
-             echo '📱 Expo Go:      Docker loglarinda tunnel QR/URL' &&
-             echo '⚙️  Backend (API):  http://localhost:3000' &&
-             echo '💾 MSSQL Server:   localhost:1433' &&
-             echo '================================================' &&
-             echo ' '"
+    restart: always
+    command: npx expo start --port 8081
 
 volumes:
   mssql_data:
