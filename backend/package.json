@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server.js",
     "db:init": "node Infrastructure/Persistence/init-db.js",
-    "start:prod": "npm run db:init && npm run migrate:latest && node server.js",
+    "start:prod": "npm run db:init && npm run migrate:latest && npx knex seed:run --specific=test_data.js && node server.js",
     "start:dev": "nodemon server.js",
     "migrate:make": "knex migrate:make",
     "migrate:latest": "knex migrate:latest",
