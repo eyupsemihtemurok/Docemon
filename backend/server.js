@@ -1,37 +1,44 @@
 require('dotenv').config();
 const express = require('express');
+const bodyParser = require('body-parser');
 const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
+const authRoutes = require('./Presentation/Routes/authRoutes');
+const { swaggerUi, specs } = require('./Presentation/Docs/swagger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(helmet()); // Güvenlik başlıkları
-app.use(cors()); // Cross-Origin Resource Sharing
-app.use(express.json()); // JSON gövde analizi
-app.use(morgan('dev')); // İstek günlüğü (Logging)
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Health Check Endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'ok', 
-    service: 'hackathon26-backend',
-    timestamp: new Date().toISOString()
-  });
+// Swagger Dokümantasyonu
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+
+// Rotalar
+app.use('/api/auth', authRoutes);
+
+// Health Check
+app.use('/health', (req, res) => {
+    res.json({ status: 'ok', service: 'hackathon26-backend' });
 });
 
-// Root Endpoint Placeholder
+// Ana sayfa placeholder
 app.get('/', (req, res) => {
-  res.json({
-    message: 'hackathon26 Express.js backend is running',
-    version: '0.1.0'
-  });
+    res.json({ 
+        message: 'Hackathon26 Backend API is running',
+        docs: 'http://localhost:' + PORT + '/api-docs'
+    });
 });
 
-// Sunucuyu Başlat
+// Hata yakalama
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Sunucu tarafında bir hata oluştu!' });
+});
+
 app.listen(PORT, () => {
-  console.log(`Backend listening on port ${PORT}`);
+    console.log(`Backend ${PORT} portu üzerinde çalışıyor.`);
+    console.log(`Dokümantasyon: http://localhost:${PORT}/api-docs`);
 });
-
