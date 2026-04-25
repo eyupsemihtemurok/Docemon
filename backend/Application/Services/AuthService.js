@@ -6,45 +6,42 @@ class AuthService {
         this.userRepository = userRepository;
     }
 
-    async register({ tc, ad_soyad, email, sifre, kan_grubu, kronik_hastaliklar, dogum_tarihi, telefon }) {
-        // TCKN hashleme (Deterministic)
-        const tcHash = SecurityService.hashDeterministic(tc);
+    async register({ nationalId, fullName, email, password, bloodType, chronicDiseases, birthDate, phone }) {
+        const nationalIdHash = SecurityService.hashDeterministic(nationalId);
         
-        // E-posta veya TC kontrolü
         const existingEmail = await this.userRepository.getByEmail(email);
-        if (existingEmail) throw new Error('Bu e-posta adresi zaten kullanımda.');
+        if (existingEmail) throw new Error('Email already in use.');
         
-        const existingTC = await this.userRepository.getByTC(tcHash);
-        if (existingTC) throw new Error('Bu T.C. Kimlik numarası zaten kayıtlı.');
+        const existingTC = await this.userRepository.getByNationalId(nationalIdHash);
+        if (existingTC) throw new Error('National ID already registered.');
 
-        // Şifre hashleme
-        const passwordHash = await SecurityService.hashPassword(sifre);
+        const passwordHash = await SecurityService.hashPassword(password);
 
         const newUser = await this.userRepository.create({
-            tc: tcHash,
-            ad_soyad,
+            national_id: nationalIdHash,
+            full_name: fullName,
             email,
-            sifre: passwordHash,
-            kan_grubu,
-            kronik_hastaliklar,
-            dogum_tarihi,
-            telefon,
-            aktiflik: 1
+            password: passwordHash,
+            blood_type: bloodType,
+            chronic_diseases: chronicDiseases,
+            birth_date: birthDate,
+            phone,
+            is_active: true
         });
 
         return {
             id: newUser.id,
-            ad_soyad: newUser.ad_soyad,
+            fullName: newUser.full_name,
             email: newUser.email
         };
     }
 
     async login(email, password) {
         const user = await this.userRepository.getByEmail(email);
-        if (!user) throw new Error('Geçersiz e-posta veya şifre.');
+        if (!user) throw new Error('Invalid email or password.');
 
-        const isMatch = await SecurityService.comparePassword(password, user.sifre);
-        if (!isMatch) throw new Error('Geçersiz e-posta veya şifre.');
+        const isMatch = await SecurityService.comparePassword(password, user.password);
+        if (!isMatch) throw new Error('Invalid email or password.');
 
         const token = JwtService.generateToken(user);
         
@@ -52,7 +49,7 @@ class AuthService {
             token,
             user: {
                 id: user.id,
-                ad_soyad: user.ad_soyad,
+                fullName: user.full_name,
                 email: user.email
             }
         };
@@ -60,24 +57,28 @@ class AuthService {
 
     async getProfile(userId) {
         const user = await this.userRepository.getById(userId);
-        if (!user) throw new Error('Kullanıcı bulunamadı.');
+        if (!user) throw new Error('User not found.');
 
-        // Şifre ve TC hash'ini gönderme
-        const { sifre, tc, ...profile } = user;
+        const { password, national_id, ...profile } = user;
         return profile;
     }
 
     async updateProfile(userId, updateData) {
-        // Şifre güncelleniyorsa hashle
-        if (updateData.sifre) {
-            updateData.sifre = await SecurityService.hashPassword(updateData.sifre);
+        if (updateData.password) {
+            updateData.password = await SecurityService.hashPassword(updateData.password);
         }
         
-        // TC değiştirilemez kuralı (isteğe bağlı)
-        delete updateData.tc;
+        // Remove DB internal names if present in updateData or map them
+        const mappedData = {};
+        if (updateData.fullName) mappedData.full_name = updateData.fullName;
+        if (updateData.bloodType) mappedData.blood_type = updateData.bloodType;
+        if (updateData.chronicDiseases) mappedData.chronic_diseases = updateData.chronicDiseases;
+        if (updateData.birthDate) mappedData.birth_date = updateData.birthDate;
+        if (updateData.phone) mappedData.phone = updateData.phone;
+        if (updateData.password) mappedData.password = updateData.password;
 
-        const updatedUser = await this.userRepository.update(userId, updateData);
-        const { sifre, tc, ...profile } = updatedUser;
+        const updatedUser = await this.userRepository.update(userId, mappedData);
+        const { password, national_id, ...profile } = updatedUser;
         return profile;
     }
 }

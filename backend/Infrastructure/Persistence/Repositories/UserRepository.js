@@ -15,12 +15,11 @@ class UserRepository extends IUserRepository {
         return await db(this.tableName).where({ email }).first();
     }
 
-    async getByTC(tcHash) {
-        return await db(this.tableName).where({ tc: tcHash }).first();
+    async getByNationalId(nationalIdHash) {
+        return await db(this.tableName).where({ national_id: nationalIdHash }).first();
     }
 
     async create(userData) {
-        // MSSQL'de [user] rezerve kelime olduğu için köseli parantez gerekebilir ama Knex bunu halleder
         const [id] = await db(this.tableName).insert(userData).returning('id');
         return { ...userData, id };
     }
@@ -28,7 +27,7 @@ class UserRepository extends IUserRepository {
     async update(id, userData) {
         await db(this.tableName).where({ id }).update({
             ...userData,
-            guncelleme_tarihi: db.fn.now()
+            updated_at: db.fn.now()
         });
         return await this.getById(id);
     }

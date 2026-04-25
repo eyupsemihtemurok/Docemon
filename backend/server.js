@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const authRoutes = require('./Presentation/Routes/authRoutes');
+const friendRoutes = require('./Presentation/Routes/friendRoutes');
 const { swaggerUi, specs } = require('./Presentation/Docs/swagger');
 
 const app = express();
@@ -13,32 +14,33 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Swagger Dokümantasyonu
+// Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
-// Rotalar
+// Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/friends', friendRoutes);
 
 // Health Check
 app.use('/health', (req, res) => {
     res.json({ status: 'ok', service: 'hackathon26-backend' });
 });
 
-// Ana sayfa placeholder
+// Home page placeholder
 app.get('/', (req, res) => {
     res.json({ 
         message: 'Hackathon26 Backend API is running',
-        docs: 'http://localhost:' + PORT + '/api-docs'
+        docs: `http://localhost:${PORT}/api-docs`
     });
 });
 
-// Hata yakalama
+// Error handling
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).json({ error: 'Sunucu tarafında bir hata oluştu!' });
+    res.status(500).json({ error: 'Internal Server Error' });
 });
 
 app.listen(PORT, () => {
-    console.log(`Backend ${PORT} portu üzerinde çalışıyor.`);
-    console.log(`Dokümantasyon: http://localhost:${PORT}/api-docs`);
+    console.log(`Backend is running on port ${PORT}.`);
+    console.log(`Documentation: http://localhost:${PORT}/api-docs`);
 });
