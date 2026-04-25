@@ -48,7 +48,7 @@ services:
              echo ' ' &&
              echo '🌐 Frontend (Web): http://localhost:19006' &&
              echo '⚙️  Backend (API):  http://localhost:3000' &&
-             echo '💾 MSSQL Server:   localhost:1433
+             echo '💾 MSSQL Server:   localhost:1433' &&
              echo '================================================' &&
              echo ' '"
 
