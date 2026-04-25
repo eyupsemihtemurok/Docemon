@@ -40,6 +40,7 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
   const [locationDetails, setLocationDetails] = useState('');
   const [rescueLoading, setRescueLoading] = useState(false);
   const [rescueMessage, setRescueMessage] = useState(null);
+  const [isFabMenuVisible, setIsFabMenuVisible] = useState(false);
 
   const loadDashboard = async () => {
     if (!authToken) {
@@ -467,6 +468,44 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
           </View>
         </View>
       </ScrollView>
+
+      {isFabMenuVisible && (
+        <Pressable
+          style={styles.fabMenuOverlay}
+          onPress={() => setIsFabMenuVisible(false)}
+        />
+      )}
+
+      {isFabMenuVisible && (
+        <View style={styles.fabMenu}>
+          <Pressable style={styles.menuItemPill} onPress={() => setIsFabMenuVisible(false)}>
+            <Text style={styles.menuItemText}>Bluetooth Mesh</Text>
+            <Text style={styles.menuItemIcon}>📶</Text>
+          </Pressable>
+
+          <Pressable style={styles.menuItemPill} onPress={() => setIsFabMenuVisible(false)}>
+            <Text style={styles.menuItemText}>Bilgilendirme Paneli</Text>
+            <Text style={styles.menuItemIcon}>ℹ️</Text>
+          </Pressable>
+
+          <Pressable
+            style={[styles.menuItemPill, styles.menuItemPillPrimary]}
+            onPress={() => {
+              setIsFabMenuVisible(false);
+            }}
+          >
+            <Text style={[styles.menuItemText, styles.menuItemTextPrimary]}>Kayıp Şüphesi</Text>
+            <Text style={styles.menuItemIcon}>🔍</Text>
+          </Pressable>
+        </View>
+      )}
+
+      <Pressable
+        style={styles.fab}
+        onPress={() => setIsFabMenuVisible(!isFabMenuVisible)}
+      >
+        <Text style={[styles.fabIcon, isFabMenuVisible && { transform: [{ rotate: '45deg' }] }]}>+</Text>
+      </Pressable>
     </View>
   );
 }
