@@ -1,28 +1,44 @@
 # hackathon26 Frontend
 
-Bu klasör, Expo tabanlı React Native arayüzünü içerir ve Docker içinde de web olarak çalışır.
+Expo tabanli React Native arayuzu. Web ve mobil (Expo Go) gelistirme akislarini destekler.
 
-## Özellikler
-- Tek kod tabanından web görünümü
-- Ana sayfa, hizmetler, randevular ve profil bölümleri
-- Docker için optimize edilmiş build context
+## Uygulama Akisi
+- `/home`: Navbar yok. Yapilacaklar kutusu, reklam icerir alani ve Kayit ol butonu.
+- `/loginPage`: Kayit ol / Giris yap ekrani.
+- `/dashboard`: Login sonrasi acilan ekran. Navbar + burger menu + yan panel + placeholder menu butonlari.
 
-## Klasör Yapısı
-- `App.js`: Uygulamanın ana kabuğu ve gezinme yapısı
-- `pages/`: Ekran içerikleri
-- `Dockerfile`: Frontend image tanımı
+## Klasor Yapisi
+- `App.js`: Sadece giris noktasi, `AppRoot` render eder.
+- `src/app/AppRoot.js`: Route kontrolu ve sayfa orkestrasyonu.
+- `src/constants/routes.js`: Route sabitleri ve dashboard menu listesi.
+- `src/hooks/useWebRouter.js`: Web path yonetimi (`/home`, `/loginPage`, `/dashboard`).
+- `src/screens/`: Ekran bilesenleri (`HomeScreen`, `LoginPage`, `DashboardScreen`).
+- `src/components/dashboard/`: Dashboard'a ozel bilesenler (`DashboardNavbar`, `DashboardSidePanel`).
 
-## Çalıştırma
-Yerelde:
+## Komutlar
+Yerelde web:
 ```bash
 npm install
-npm run start
+npm run web
 ```
 
-Docker ile:
+Yerelde mobil:
+```bash
+npm run mobile
+```
+
+Tunnel ile mobil:
+```bash
+npm run mobile:tunnel
+```
+
+Docker web:
 ```bash
 docker compose up -d --build hackathon26-frontend
 ```
 
-Web adresi:
-`http://localhost:19006`
+Docker mobil:
+```bash
+docker compose up -d --build hackathon26-frontend-mobile
+docker compose logs -f hackathon26-frontend-mobile
+```

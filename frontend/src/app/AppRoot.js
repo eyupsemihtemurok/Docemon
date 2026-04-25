@@ -51,7 +51,10 @@ export default function AppRoot() {
 
       return (
         <View style={styles.dashboardWrapper}>
-          <DashboardNavbar onToggleMenu={() => setIsMenuOpen((prev) => !prev)} />
+          <DashboardNavbar
+            userName="Mete"
+            onToggleMenu={() => setIsMenuOpen((prev) => !prev)}
+          />
           <DashboardScreen activeMenuItem={activeMenuItemLabel} />
           <DashboardSidePanel
             visible={isMenuOpen}
