@@ -6,14 +6,16 @@
     "start": "expo start --web --port 19006",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web --port 19006"
+    "web": "expo start --web --port 19006",
+    "mobile": "expo start --port 8081",
+    "mobile:tunnel": "expo start --tunnel --port 8081"
   },
   "dependencies": {
-    "@expo/metro-runtime": "~3.2.3",
-    "expo": "~51.0.28",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-native": "0.74.5",
-    "react-native-web": "~0.19.10"
+    "@expo/metro-runtime": "~6.1.2",
+    "expo": "^54.0.33",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-web": "^0.21.0"
   }
 }
