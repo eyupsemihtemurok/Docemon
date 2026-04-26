@@ -8,6 +8,7 @@ export const ROUTES = {
   BIOMETRIC_OPERATOR: '/biometric/operator',
   DISASTER_MAP: '/disaster-map',
   FACE_MATCH: '/face-match',
+  INFORMATION: '/information',
 };
 
 export const DASHBOARD_MENU_ITEMS = [
