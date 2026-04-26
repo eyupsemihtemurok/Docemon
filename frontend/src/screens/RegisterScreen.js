@@ -14,16 +14,29 @@ import * as ImagePicker from 'expo-image-picker';
 import { registerBiometric } from '../api/biometric';
 import styles from './styles/RegisterScreen.styles';
 
-/**
- * Biyometrik Kayıt Ekranı
- * StyleSheet.create ile stilize edilmiş, gerçek kamera/galeri erişimli.
- */
-const RegisterScreen = ({ navigate }) => {
+const DEFAULT_FORM = {
+  NationalId: '',
+  FullName: '',
+  Email: '',
+  Password: '',
+};
+
+export const BiometricRegisterForm = ({
+  navigate,
+  onSuccess,
+  onError,
+  onBack,
+  embedded = false,
+  showHeader = true,
+  title = 'Kayıt Ol',
+  subtitle = 'Biyometrik sistem için profilinizi oluşturun',
+  submitLabel = 'Kaydı Tamamla',
+  backPrefix = 'Zaten hesabınız var mı? ',
+  backLabel = 'Giriş Yap',
+  showBackLink = true,
+}) => {
   const [form, setForm] = useState({
-    NationalId: '',
-    FullName: '',
-    Email: '',
-    Password: '',
+    ...DEFAULT_FORM,
   });
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -116,12 +129,33 @@ const RegisterScreen = ({ navigate }) => {
       );
       formData.append('image', { uri: image.uri, name: image.name, type: image.type });
 
-      await registerBiometric(formData);
+      const response = await registerBiometric(formData);
+      const result = response?.data?.user ?? response?.data ?? null;
+
+      if (onSuccess) {
+        onSuccess({
+          userData: {
+            nationalId: NationalId,
+            fullName: FullName,
+            email: Email,
+            password: Password,
+          },
+          response: response?.data ?? null,
+          user: result,
+        });
+        return;
+      }
+
       Alert.alert('Başarılı', 'Biyometrik kaydınız oluşturuldu.', [
-        { text: 'Tamam', onPress: () => navigate('/loginPage') },
+        { text: 'Tamam', onPress: () => navigate?.('/loginPage') },
       ]);
     } catch (error) {
       console.error('Kayıt Hatası:', error);
+      if (onError) {
+        onError(error);
+        return;
+      }
+
       Alert.alert('Hata', 'Kayıt sırasında bir hata oluştu.');
     } finally {
       setLoading(false);
@@ -129,14 +163,14 @@ const RegisterScreen = ({ navigate }) => {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      {/* Başlık */}
-      <View style={styles.headerBlock}>
-        <Text style={styles.headerTitle}>Kayıt Ol</Text>
-        <Text style={styles.headerSub}>Biyometrik sistem için profilinizi oluşturun</Text>
-      </View>
+    <View style={[embedded && styles.embeddedCard]}>
+      {showHeader && (
+        <View style={styles.headerBlock}>
+          <Text style={styles.headerTitle}>{title}</Text>
+          <Text style={styles.headerSub}>{subtitle}</Text>
+        </View>
+      )}
 
-      {/* Fotoğraf Alanı */}
       <View style={styles.photoSection}>
         <View style={styles.photoCircle}>
           {image ? (
@@ -156,7 +190,6 @@ const RegisterScreen = ({ navigate }) => {
         </View>
       </View>
 
-      {/* Form Alanları */}
       <View style={styles.formGroup}>
         <TextInput
           style={styles.input}
@@ -193,25 +226,34 @@ const RegisterScreen = ({ navigate }) => {
         />
       </View>
 
-      {/* Kayıt Butonu */}
       <Pressable
         onPress={handleRegister}
         disabled={loading}
         style={[styles.submitButton, loading && styles.submitButtonDisabled]}
       >
-        {loading ? (
-          <ActivityIndicator color="#ffffff" />
-        ) : (
-          <Text style={styles.submitButtonText}>Kaydı Tamamla</Text>
-        )}
+        {loading ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.submitButtonText}>{submitLabel}</Text>}
       </Pressable>
 
-      {/* Giriş Yap Linki */}
-      <Pressable onPress={() => navigate('/loginPage')} style={styles.backLink}>
-        <Text style={styles.backLinkText}>
-          Zaten hesabınız var mı? <Text style={styles.backLinkBold}>Giriş Yap</Text>
-        </Text>
-      </Pressable>
+      {showBackLink && (
+        <Pressable onPress={onBack || (() => navigate?.('/loginPage'))} style={styles.backLink}>
+          <Text style={styles.backLinkText}>
+            {backPrefix}
+            <Text style={styles.backLinkBold}>{backLabel}</Text>
+          </Text>
+        </Pressable>
+      )}
+    </View>
+  );
+};
+
+/**
+ * Biyometrik Kayıt Ekranı
+ * StyleSheet.create ile stilize edilmiş, gerçek kamera/galeri erişimli.
+ */
+const RegisterScreen = ({ navigate }) => {
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+      <BiometricRegisterForm navigate={navigate} />
     </ScrollView>
   );
 };

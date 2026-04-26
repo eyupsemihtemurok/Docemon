@@ -14,6 +14,8 @@ class FriendRepository extends IFriendRepository {
             .where(function() {
                 this.where('friend.sender_id', userId).orWhere('friend.receiver_id', userId);
             })
+            .andWhere('user.id', '!=', userId)
+            .andWhereRaw('friend.sender_id <> friend.receiver_id')
             .andWhere('friend.status', 'ACCEPTED')
             .select(
                 'friend.id as friendshipId',
@@ -75,6 +77,8 @@ class FriendRepository extends IFriendRepository {
             .where(function() {
                 this.where('friend.sender_id', userId).orWhere('friend.receiver_id', userId);
             })
+            .andWhere('user.id', '!=', userId)
+            .andWhereRaw('friend.sender_id <> friend.receiver_id')
             .andWhere('friend.status', 'ACCEPTED')
             .andWhere('friend.is_emergency_contact', true)
             .select(

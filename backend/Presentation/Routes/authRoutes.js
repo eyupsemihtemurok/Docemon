@@ -1,8 +1,10 @@
 const express = require('express');
+const multer = require('multer');
 const AuthController = require('../Controllers/AuthController');
 const authMiddleware = require('../Middlewares/AuthMiddleware');
 
 const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 /**
  * @swagger
@@ -48,7 +50,7 @@ const router = express.Router();
  *       201:
  *         description: User created
  */
-router.post('/register', AuthController.register);
+router.post('/register', upload.single('face_data'), AuthController.register);
 
 /**
  * @swagger

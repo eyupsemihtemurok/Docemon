@@ -87,6 +87,18 @@ class BiometricController {
             if (!req.file) return res.status(400).json({ error: 'Image file is required.' });
 
             const userData = buildRegistrationPayload(req.body);
+            const hasUserRegistrationData = Boolean(
+                 userData.fullName && userData.email && userData.password
+            );
+
+            // LoginPage register akışında kullanıcı bilgileri auth/register ile kaydedilir,
+            // bu endpoint ise yalnızca fotoğraf yüklemek için de çağrılabilir.
+            if (!hasUserRegistrationData) {
+                return res.status(200).json({
+                    message: 'Biometric photo uploaded successfully.',
+                });
+            }
+
             const result = await registerUseCase.execute({
                 userData,
                 imageBuffer: req.file.buffer,

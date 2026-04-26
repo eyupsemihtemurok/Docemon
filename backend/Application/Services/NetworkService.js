@@ -25,7 +25,11 @@ class NetworkService {
     }
 
     async createRequest(senderId, receiverId) {
-        if (senderId === receiverId) throw new Error('You cannot send a friend request to yourself.');
+        if (!senderId || !receiverId) throw new Error('Sender and receiver are required.');
+
+        if (String(senderId).toLowerCase() === String(receiverId).toLowerCase()) {
+            throw new Error('You cannot send a friend request to yourself.');
+        }
 
         const existing = await this.friendRepository.getFriendRequest(senderId, receiverId);
         if (existing) {

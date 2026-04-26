@@ -6,7 +6,11 @@ class AuthService {
         this.userRepository = userRepository;
     }
 
-    async register({ nationalId, fullName, email, password, bloodType, chronicDiseases, birthDate, phone, provinceId, districtId }) {
+    async register({ nationalId, fullName, email, password, bloodType, chronicDiseases, birthDate, phone, provinceId, districtId, faceDataBuffer, faceDataMimeType }) {
+        if (!nationalId || !fullName || !email || !password) {
+            throw new Error('nationalId, fullName, email ve password alanları zorunludur.');
+        }
+
         const nationalIdHash = SecurityService.hashDeterministic(nationalId);
         
         const existingEmail = await this.userRepository.getByEmail(email);
@@ -28,6 +32,8 @@ class AuthService {
             phone,
             province_id: provinceId,
             district_id: districtId,
+            face_data: faceDataBuffer ? faceDataBuffer.toString('base64') : null,
+            face_mime_type: faceDataMimeType || null,
             is_active: true
         });
 

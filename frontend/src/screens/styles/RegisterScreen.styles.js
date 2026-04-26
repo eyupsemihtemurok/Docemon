@@ -26,6 +26,10 @@ export default StyleSheet.create({
     marginTop: 6,
   },
 
+  embeddedCard: {
+    width: '100%',
+  },
+
   // Fotoğraf Alanı
   photoSection: {
     alignItems: 'center',

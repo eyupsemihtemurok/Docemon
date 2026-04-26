@@ -1,4 +1,14 @@
-import { requestJson } from './httpClient';
+import { requestFormData, requestJson } from './httpClient';
+
+function isFormDataPayload(payload) {
+  return (
+    payload &&
+    typeof payload === 'object' &&
+    typeof payload.append === 'function' &&
+    // React Native FormData polyfill keeps parts internally.
+    ('_parts' in payload || Object.prototype.toString.call(payload) === '[object FormData]')
+  );
+}
 
 export function loginUser(credentials) {
   return requestJson('/api/auth/login', {
@@ -8,6 +18,12 @@ export function loginUser(credentials) {
 }
 
 export function registerUser(payload) {
+  if (isFormDataPayload(payload)) {
+    return requestFormData('/api/auth/register', payload, {
+      method: 'POST',
+    });
+  }
+
   return requestJson('/api/auth/register', {
     method: 'POST',
     body: JSON.stringify(payload),

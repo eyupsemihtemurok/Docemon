@@ -7,7 +7,11 @@ const authService = new AuthService(userRepository);
 class AuthController {
     static async register(req, res) {
         try {
-            const result = await authService.register(req.body);
+            const result = await authService.register({
+                ...req.body,
+                faceDataBuffer: req.file?.buffer,
+                faceDataMimeType: req.file?.mimetype,
+            });
             res.status(201).json({
                 message: 'User registered successfully.',
                 ...result
