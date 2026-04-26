@@ -9,6 +9,7 @@ import DashboardScreen from '../screens/DashboardScreen';
 import DisasterMapScreen from '../screens/DisasterMapScreen';
 import FaceMatchScreen from '../screens/FaceMatchScreen';
 import HomeScreen from '../screens/HomeScreen';
+import InformationPage from '../screens/InformationPage';
 import LoginPage from '../screens/LoginPage';
 import NotificationsScreen from '../screens/NotificationsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -119,6 +120,7 @@ export default function AppRoot() {
             activeMenuItem={activeMenuItemLabel}
             authToken={authToken}
             currentUser={currentUser}
+            navigate={navigate}
             navigate={navigate}
           />
           <DashboardSidePanel

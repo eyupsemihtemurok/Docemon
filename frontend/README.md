@@ -32,6 +32,11 @@ Tunnel ile mobil:
 npm run mobile:tunnel
 ```
 
+Expo Go için tunnel modunda çalıştırmak isterseniz:
+```bash
+docker-compose up hackathon26-frontend-mobile
+```
+
 Docker web:
 ```bash
 docker compose up -d --build hackathon26-frontend

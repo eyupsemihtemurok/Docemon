@@ -11,6 +11,7 @@ import {
   updateEmergencyContact,
   uploadRescuePhoto,
 } from '../services/dashboardApi';
+import { ROUTES } from '../constants/routes';
 import styles from './styles/DashboardScreen.styles';
 
 function formatDisasterLocation(disaster) {
@@ -28,26 +29,7 @@ function getUserDisplayName(user) {
   return user.full_name || user.fullName || user.email || 'Kullanıcı';
 }
 
-function SectionHeader({ icon, title, description, isExpanded, onPress, iconBg }) {
-  return (
-    <Pressable style={styles.sectionHeader} onPress={onPress}>
-      <View style={[styles.sectionIconWrap, { backgroundColor: iconBg || '#dcfce7' }]}>
-        <Text style={styles.sectionIcon}>{icon}</Text>
-      </View>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.sectionTitleEmbedded}>{title}</Text>
-        <Text style={styles.sectionDescription}>{description}</Text>
-      </View>
-      <View style={[styles.chevronWrap, isExpanded && styles.chevronWrapActive]}>
-        <Text style={[styles.accordionChevron, isExpanded && styles.accordionChevronActive]}>
-          {isExpanded ? '▲' : '▼'}
-        </Text>
-      </View>
-    </Pressable>
-  );
-}
-
-export default function DashboardScreen({ activeMenuItem, authToken, currentUser }) {
+export default function DashboardScreen({ activeMenuItem, authToken, currentUser, navigate }) {
   const [friends, setFriends] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [activeDisasters, setActiveDisasters] = useState([]);
@@ -600,15 +582,22 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
 
       {isFabMenuVisible && (
         <View style={styles.fabMenu}>
+          <Pressable style={styles.menuItemPill} onPress={() => setIsFabMenuVisible(false)}>
+            <Text style={styles.menuItemText}>Bluetooth Mesh</Text>
+            <Text style={styles.menuItemIcon}>📶</Text>
+          </Pressable>
+
           <Pressable
             style={styles.menuItemPill}
             onPress={() => {
               setIsFabMenuVisible(false);
-              navigate(ROUTES.BIOMETRIC_OPERATOR);
+              if (navigate) {
+                navigate(ROUTES.INFORMATION);
+              }
             }}
           >
-            <Text style={styles.menuItemText}>Operatör Paneli</Text>
-            <Text style={styles.menuItemIcon}>🖥️</Text>
+            <Text style={styles.menuItemText}>Bilgilendirme Paneli</Text>
+            <Text style={styles.menuItemIcon}>ℹ️</Text>
           </Pressable>
 
           <Pressable
