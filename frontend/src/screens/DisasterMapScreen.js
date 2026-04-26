@@ -108,11 +108,12 @@ export default function DisasterMapScreen({ navigate }) {
     }
   };
 
-  // Build { plateCode: "afet" } for the map
+  // Build { provinceName: "afet" } for the map
   const disasterStatus = {};
   disasters.forEach(d => {
-    const code = pad2(d.plate_code ?? d.province_id);
-    if (code && code !== '00') disasterStatus[code] = 'afet';
+    if (d.province_name) {
+      disasterStatus[d.province_name] = 'afet';
+    }
   });
 
   const selectedProvinceName = provinces.find(p => p.id === formProvinceId)?.name;

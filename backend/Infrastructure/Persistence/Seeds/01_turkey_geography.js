@@ -6,12 +6,12 @@ const path = require('path');
  * @returns { Promise<void> } 
  */
 exports.seed = async function(knex) {
-  // MSSQL Agresif Sıfırlama
+  // Temiz başlangıç — bağımlılık sırasına dikkat
+  await knex.raw('DELETE FROM disaster_district');
   await knex.raw('DELETE FROM district');
   await knex.raw('DELETE FROM province');
-  // Sayaçları sıfıra çekiyoruz (ilk giriş 1 olacak)
-  await knex.raw("DBCC CHECKIDENT ('district', RESEED, 0)");
-  await knex.raw("DBCC CHECKIDENT ('province', RESEED, 0)");
+  // district has an identity column, province does not
+  try { await knex.raw("DBCC CHECKIDENT ('district', RESEED, 0)"); } catch (_) { /* ignore if not identity */ }
 
   const geoDataPath = path.join(__dirname, 'data', 'turkey_geo.json');
   const geoData = JSON.parse(fs.readFileSync(geoDataPath, 'utf8'));

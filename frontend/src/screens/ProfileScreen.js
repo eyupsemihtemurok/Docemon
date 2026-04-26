@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import styles from './styles/ProfileScreen.styles';
 import { fetchCurrentUser, fetchEmergencyContacts, fetchFriends } from '../services/authApi';
 import { getAuthToken } from '../services/authStorage';
@@ -44,6 +44,8 @@ export default function ProfileScreen({ navigate }) {
     phone: '-',
     friendsCount: 0,
     relativesCount: 0,
+    faceData: null,
+    faceMime: null,
   });
   const [friends, setFriends] = useState([]);
   const [relatives, setRelatives] = useState([]);
@@ -82,6 +84,8 @@ export default function ProfileScreen({ navigate }) {
         phone: profile?.phone || '-',
         friendsCount: normalizedFriends.length,
         relativesCount: normalizedRelatives.length,
+        faceData: profile?.face_data,
+        faceMime: profile?.face_mime_type,
       },
       friends: normalizedFriends,
       relatives: normalizedRelatives,
@@ -157,7 +161,14 @@ export default function ProfileScreen({ navigate }) {
         {/* Centered Avatar */}
         <View style={styles.headerTop}>
           <View style={styles.largeAvatar}>
-            <Text style={styles.avatarText}>{userData.name.charAt(0)}</Text>
+            {userData.faceData ? (
+              <Image 
+                source={{ uri: `data:${userData.faceMime || 'image/jpeg'};base64,${userData.faceData}` }} 
+                style={{ width: '100%', height: '100%', borderRadius: 60 }} 
+              />
+            ) : (
+              <Text style={styles.avatarText}>{userData.name.charAt(0)}</Text>
+            )}
           </View>
         </View>
 

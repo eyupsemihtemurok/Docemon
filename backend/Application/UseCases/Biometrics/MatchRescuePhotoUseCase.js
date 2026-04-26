@@ -15,8 +15,9 @@ class MatchRescuePhotoUseCase {
         for (const target of unreachableUsers) {
             const targetEmbedding = JSON.parse(target.face_embedding);
             const score = calculateCosineSimilarity(rescueEmbedding, targetEmbedding);
+            console.log(`[MatchRescuePhoto] Checking match for ${target.full_name}: Score = ${score}`);
 
-            if (score >= 0.8) {
+            if (score >= 0.7) {
                 const verification = await this.verificationAlertRepository.createVerificationAlert({
                     user_id: target.id,
                     image_id: imageName,

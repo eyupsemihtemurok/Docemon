@@ -21,6 +21,7 @@ import styles from './styles/RescueScannerScreen.styles';
 const RescueScannerScreen = ({ navigate }) => {
   const [healthDetails, setHealthDetails] = useState('');
   const [locationDetails, setLocationDetails] = useState('');
+  const [safetyStatus, setSafetyStatus] = useState('SAFE');
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -94,9 +95,16 @@ const RescueScannerScreen = ({ navigate }) => {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('image', { uri: image.uri, name: image.name, type: image.type });
+      if (Platform.OS === 'web') {
+        const res = await fetch(image.uri);
+        const blob = await res.blob();
+        formData.append('image', blob, image.name || 'rescue.jpg');
+      } else {
+        formData.append('image', { uri: image.uri, name: image.name, type: image.type });
+      }
       formData.append('healthDetails', healthDetails || 'Bilinmiyor');
       formData.append('locationDetails', locationDetails || 'Belirtilmedi');
+      formData.append('safetyStatus', safetyStatus || 'SAFE');
 
       await uploadRescuePhoto(formData);
 
@@ -159,6 +167,22 @@ const RescueScannerScreen = ({ navigate }) => {
 
       {/* Form Alanları */}
       <View style={styles.formSection}>
+        <View style={{ marginBottom: 15 }}>
+          <Text style={styles.inputLabel}>Afetzedenin Durumu</Text>
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 5 }}>
+            <Pressable 
+               style={[styles.input, { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: safetyStatus === 'SAFE' ? '#dcfce7' : '#f8fafc', borderColor: safetyStatus === 'SAFE' ? '#10b981' : '#e2e8f0' }]}
+               onPress={() => setSafetyStatus('SAFE')}>
+               <Text style={{ color: safetyStatus === 'SAFE' ? '#047857' : '#64748b', fontWeight: 'bold' }}>✅ Sağlığı Yerinde</Text>
+            </Pressable>
+            <Pressable 
+               style={[styles.input, { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: safetyStatus === 'INJURED' ? '#fee2e2' : '#f8fafc', borderColor: safetyStatus === 'INJURED' ? '#ef4444' : '#e2e8f0' }]}
+               onPress={() => setSafetyStatus('INJURED')}>
+               <Text style={{ color: safetyStatus === 'INJURED' ? '#b91c1c' : '#64748b', fontWeight: 'bold' }}>🚨 Yaralı / Acil</Text>
+            </Pressable>
+          </View>
+        </View>
+
         <View>
           <Text style={styles.inputLabel}>Sağlık Durumu Notu</Text>
           <TextInput

@@ -19,7 +19,7 @@ export function loginUser(credentials) {
 
 export function registerUser(payload) {
   if (isFormDataPayload(payload)) {
-    return requestFormData('/api/auth/register', payload, {
+    return requestFormData('/api/biometric/register', payload, {
       method: 'POST',
     });
   }

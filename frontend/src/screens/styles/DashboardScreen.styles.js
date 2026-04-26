@@ -848,4 +848,39 @@ export default StyleSheet.create({
   menuItemIcon: {
     fontSize: 18,
   },
+
+  /* ─────────────── SECTION HEADER (Accordion) ─────────────── */
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+  },
+  sectionHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 12,
+  },
+  sectionHeaderIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sectionHeaderIcon: {
+    fontSize: 20,
+  },
+  sectionHeaderChevron: {
+    fontSize: 12,
+    color: '#94a3b8',
+    fontWeight: '700',
+  },
+  accordionBody: {
+    marginTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+    paddingTop: 12,
+  },
 });

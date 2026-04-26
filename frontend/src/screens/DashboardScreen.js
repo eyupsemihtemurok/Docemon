@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { fetchCurrentUser } from '../services/authApi';
 import { ROUTES } from '../constants/routes';
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -11,8 +12,28 @@ import {
   updateEmergencyContact,
   uploadRescuePhoto,
 } from '../services/dashboardApi';
-import { ROUTES } from '../constants/routes';
 import styles from './styles/DashboardScreen.styles';
+
+/**
+ * Accordion başlığı — merge sonrası eklenen bileşen.
+ * Her bölüm kartının üstünde kullanılır.
+ */
+function SectionHeader({ icon, iconBg, title, description, isExpanded, onPress }) {
+  return (
+    <Pressable style={styles.sectionHeader} onPress={onPress}>
+      <View style={styles.sectionHeaderLeft}>
+        <View style={[styles.sectionHeaderIconWrap, { backgroundColor: iconBg || '#f0fdf4' }]}>
+          <Text style={styles.sectionHeaderIcon}>{icon}</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.sectionTitle}>{title}</Text>
+          {description ? <Text style={styles.sectionDescription}>{description}</Text> : null}
+        </View>
+      </View>
+      <Text style={styles.sectionHeaderChevron}>{isExpanded ? '▲' : '▼'}</Text>
+    </Pressable>
+  );
+}
 
 function formatDisasterLocation(disaster) {
   return disaster.location_name || disaster.locationName || 'Konum belirtilmedi';
@@ -42,6 +63,8 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
   const [locationDetails, setLocationDetails] = useState('');
   const [rescueLoading, setRescueLoading] = useState(false);
   const [rescueMessage, setRescueMessage] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [safetyStatus, setSafetyStatus] = useState('SAFE');
   const [isFabMenuVisible, setIsFabMenuVisible] = useState(false);
 
   // Accordion States — all closed by default
@@ -60,15 +83,17 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
     setDashboardMessage(null);
 
     try {
-      const [friendList, requestList, disasterList] = await Promise.all([
+      const [friendList, requestList, disasterList, profileData] = await Promise.all([
         fetchFriends(authToken),
         fetchFriendRequests(authToken),
         fetchActiveDisasters(authToken),
+        fetchCurrentUser(authToken),
       ]);
 
       setFriends(Array.isArray(friendList) ? friendList : []);
       setPendingRequests(Array.isArray(requestList) ? requestList : []);
       setActiveDisasters(Array.isArray(disasterList) ? disasterList : []);
+      setUserProfile(profileData);
     } catch (error) {
       setDashboardMessage({
         type: 'error',
@@ -191,6 +216,7 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
         imageAsset: selectedImage,
         healthDetails,
         locationDetails,
+        safetyStatus,
       });
 
       setRescueMessage({
@@ -200,6 +226,7 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
       setSelectedImage(null);
       setHealthDetails('');
       setLocationDetails('');
+      setSafetyStatus('SAFE');
     } catch (error) {
       setRescueMessage({
         type: 'error',
@@ -218,7 +245,17 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
         <View style={styles.heroCard}>
           <View style={styles.heroGradientBand} />
           <View style={styles.heroTopRow}>
-            <View style={{ flex: 1 }}>
+            {userProfile?.face_data ? (
+              <Image 
+                source={{ uri: `data:${userProfile.face_mime_type || 'image/jpeg'};base64,${userProfile.face_data}` }} 
+                style={{ width: 50, height: 50, borderRadius: 25, borderWidth: 2, borderColor: '#fff' }} 
+              />
+            ) : (
+              <View style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontSize: 20 }}>👤</Text>
+              </View>
+            )}
+            <View style={{ flex: 1, marginLeft: 12 }}>
               <View style={styles.eyebrowRow}>
                 <View style={styles.liveDot} />
                 <Text style={styles.eyebrow}>AFET DESTEK PLATFORMU</Text>
@@ -288,8 +325,31 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
 
                 <View style={styles.inputGroup}>
                   <View style={styles.inputLabelRow}>
+                    <Text style={styles.inputLabelIcon}>💚</Text>
+                    <Text style={styles.inputLabel}>Afetzedenin Durumu</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', gap: 10, marginTop: 6 }}>
+                    <Pressable
+                      onPress={() => setSafetyStatus('SAFE')}
+                      style={[styles.premiumInput, { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: safetyStatus === 'SAFE' ? '#dcfce7' : '#f8fafc', borderColor: safetyStatus === 'SAFE' ? '#10b981' : '#e2e8f0' }]}
+                    >
+                      <Text style={{ fontSize: 16 }}>{safetyStatus === 'SAFE' ? '✅' : '⬜'}</Text>
+                      <Text style={{ color: safetyStatus === 'SAFE' ? '#047857' : '#64748b', fontWeight: '700', fontSize: 13 }}>Sağlığı Yerinde</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => setSafetyStatus('INJURED')}
+                      style={[styles.premiumInput, { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: safetyStatus === 'INJURED' ? '#fee2e2' : '#f8fafc', borderColor: safetyStatus === 'INJURED' ? '#ef4444' : '#e2e8f0' }]}
+                    >
+                      <Text style={{ fontSize: 16 }}>{safetyStatus === 'INJURED' ? '☑️' : '⬜'}</Text>
+                      <Text style={{ color: safetyStatus === 'INJURED' ? '#b91c1c' : '#64748b', fontWeight: '700', fontSize: 13 }}>Yaralı / Acil</Text>
+                    </Pressable>
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <View style={styles.inputLabelRow}>
                     <Text style={styles.inputLabelIcon}>🏥</Text>
-                    <Text style={styles.inputLabel}>Sağlık Bilgisi</Text>
+                    <Text style={styles.inputLabel}>Sağlık Bilgisi Notu</Text>
                   </View>
                   <TextInput
                     style={[styles.premiumInput, styles.premiumTextArea]}

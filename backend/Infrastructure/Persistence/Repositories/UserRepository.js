@@ -20,6 +20,22 @@ class UserRepository extends IUserRepository {
         return await db(this.tableName).where({ national_id: nationalIdHash }).first();
     }
 
+    async getByIdentifier(identifier) {
+        // ID kontrolü (UUID formatında olup olmadığını kaba bir Regex ile kontrol edebiliriz, ancak basitçe where ile OR bağlayabiliriz)
+        const isUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(identifier);
+        
+        let query = db(this.tableName)
+            .where('email', identifier)
+            .orWhere('phone', identifier)
+            .orWhere('full_name', identifier);
+
+        if (isUUID) {
+            query = query.orWhere('id', identifier);
+        }
+
+        return await query.first();
+    }
+
     async createUserWithEmbedding(userData) {
         return await this.create(userData);
     }
@@ -47,7 +63,6 @@ class UserRepository extends IUserRepository {
 
     async getUnreachableUsersWithEmbeddings() {
         return await db(this.tableName)
-            .whereIn('safety_status', ['UNREACHABLE', 'UNDER_DEBRIS'])
             .whereNotNull('face_embedding')
             .select('id', 'face_embedding', 'full_name', 'email');
     }

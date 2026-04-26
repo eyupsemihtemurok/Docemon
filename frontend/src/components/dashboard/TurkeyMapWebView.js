@@ -1,21 +1,23 @@
-import React from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
 
 /**
  * Leaflet.js + GeoJSON tabanlı Türkiye İl Haritası.
- * Web platformunda iframe (srcdoc), native'de WebView kullanır.
- * GeoJSON: cihadturhan/tr-geojson (GitHub) — CDN üzerinden yüklenir.
+ * GeoJSON verisini React tarafında fetch edip iframe'e inline olarak gömer.
+ * Bu sayede iframe sandbox kısıtlamaları sorun çıkarmaz.
  */
 
-// Afet durumları: { "plateCode": "afet" | "normal" }
+const GEOJSON_URL =
+  'https://raw.githubusercontent.com/cihadturhan/tr-geojson/master/geo/tr-cities-utf8.json';
+
 const DEFAULT_DISASTER_STATUS = {
-  "46": "afet",   // Kahramanmaraş
-  "31": "afet",   // Hatay
-  "27": "afet",   // Gaziantep
-  "02": "afet",   // Adıyaman
+  "Kahramanmaraş": "afet",
+  "Hatay": "afet",
+  "Gaziantep": "afet",
+  "Adıyaman": "afet",
 };
 
-function buildLeafletHTML(disasterStatus = {}) {
+function buildLeafletHTML(disasterStatus = {}, geoJsonString = 'null') {
   const disasterJSON = JSON.stringify(disasterStatus);
 
   return `<!DOCTYPE html>
@@ -25,7 +27,7 @@ function buildLeafletHTML(disasterStatus = {}) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Türkiye Afet Haritası</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; background: #f0fdf4; }
@@ -86,6 +88,7 @@ function buildLeafletHTML(disasterStatus = {}) {
   <div id="map"></div>
   <script>
     var disasterStatus = ${disasterJSON};
+    var geoData = ${geoJsonString};
 
     var map = L.map('map', {
       center: [39.0, 35.0],
@@ -96,9 +99,8 @@ function buildLeafletHTML(disasterStatus = {}) {
     });
 
     function getStyle(feature) {
-      var plate = String(feature.properties.number || feature.properties.id || '');
-      if (plate.length === 1) plate = '0' + plate;
-      var isDisaster = disasterStatus[plate] === 'afet';
+      var name = feature.properties.name || '';
+      var isDisaster = disasterStatus[name] === 'afet';
       return {
         fillColor: isDisaster ? '#ef4444' : '#4b7c59',
         weight: 1.5,
@@ -108,13 +110,14 @@ function buildLeafletHTML(disasterStatus = {}) {
       };
     }
 
+    var geojsonLayer;
+
     function onEachFeature(feature, layer) {
       layer.on({
         mouseover: function(e) {
           var l = e.target;
-          var plate = String(feature.properties.number || feature.properties.id || '');
-          if (plate.length === 1) plate = '0' + plate;
-          var isDisaster = disasterStatus[plate] === 'afet';
+          var name = feature.properties.name || '';
+          var isDisaster = disasterStatus[name] === 'afet';
           l.setStyle({
             fillOpacity: isDisaster ? 0.95 : 0.80,
             weight: 2.5,
@@ -128,9 +131,7 @@ function buildLeafletHTML(disasterStatus = {}) {
         click: function(e) {
           var props = feature.properties;
           var name = props.name || props.il_adi || props.NAME_1 || 'Bilinmiyor';
-          var plate = String(props.number || props.id || '');
-          if (plate.length === 1) plate = '0' + plate;
-          var isDisaster = disasterStatus[plate] === 'afet';
+          var isDisaster = disasterStatus[name] === 'afet';
           var statusHtml = isDisaster
             ? '<span class="popup-status-afet">🚨 AFET BÖLGESİ</span>'
             : '<span class="popup-status-normal">✅ Normal</span>';
@@ -141,38 +142,80 @@ function buildLeafletHTML(disasterStatus = {}) {
       });
     }
 
-    var geojsonLayer;
-
-    // Türkiye il sınırları GeoJSON (cihadturhan/tr-geojson)
-    fetch('https://raw.githubusercontent.com/cihadturhan/tr-geojson/master/geo/tr-cities-utf8.json')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        geojsonLayer = L.geoJSON(data, {
-          style: getStyle,
-          onEachFeature: onEachFeature
-        }).addTo(map);
-        map.fitBounds(geojsonLayer.getBounds(), { padding: [10, 10] });
-      })
-      .catch(function(err) {
-        console.error('GeoJSON yüklenemedi:', err);
-        // Fallback: basit Türkiye çerçevesi
-        document.getElementById('map').innerHTML =
-          '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-family:sans-serif;color:#64748b;font-size:14px;">Harita yüklenirken hata oluştu. İnternet bağlantısını kontrol edin.</div>';
-      });
-  </script>
+    if (geoData) {
+      geojsonLayer = L.geoJSON(geoData, {
+        style: getStyle,
+        onEachFeature: onEachFeature
+      }).addTo(map);
+      map.fitBounds(geojsonLayer.getBounds(), { padding: [10, 10] });
+    } else {
+      document.getElementById('map').innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-family:sans-serif;color:#64748b;font-size:14px;">Harita verisi yüklenemedi.</div>';
+    }
+  <\/script>
 </body>
 </html>`;
 }
 
 export default function TurkeyMapWebView({ disasterStatus, style }) {
-  const status = disasterStatus || DEFAULT_DISASTER_STATUS;
-  const htmlContent = buildLeafletHTML(status);
+  const [geoJson, setGeoJson] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(GEOJSON_URL)
+      .then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      })
+      .then(text => {
+        if (!cancelled) {
+          setGeoJson(text);
+          setLoading(false);
+        }
+      })
+      .catch(err => {
+        console.error('GeoJSON fetch error:', err);
+        if (!cancelled) {
+          setError(err.message);
+          setLoading(false);
+        }
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  const status = disasterStatus && Object.keys(disasterStatus).length > 0
+    ? disasterStatus
+    : DEFAULT_DISASTER_STATUS;
+
+  if (loading) {
+    return (
+      <View style={[styles.container, style, styles.loadingWrap]}>
+        <ActivityIndicator size="large" color="#15803d" />
+        <Text style={styles.loadingText}>Harita yükleniyor…</Text>
+      </View>
+    );
+  }
+
+  if (error || !geoJson) {
+    return (
+      <View style={[styles.container, style, styles.fallback]}>
+        <Text style={styles.errorText}>🗺️ Harita yüklenemedi</Text>
+        <Text style={styles.errorSub}>{error || 'GeoJSON verisi alınamadı'}</Text>
+      </View>
+    );
+  }
+
+  // GeoJSON string'i doğrudan HTML'e gömüyoruz — iframe dış ağa erişmek zorunda değil
+  const htmlContent = buildLeafletHTML(status, geoJson);
+  const iframeKey = JSON.stringify(status);
 
   if (Platform.OS === 'web') {
-    // Web platformu: dangerouslySetInnerHTML ile iframe
     return (
       <View style={[styles.container, style]}>
         <iframe
+          key={iframeKey}
           srcDoc={htmlContent}
           style={{
             width: '100%',
@@ -181,13 +224,12 @@ export default function TurkeyMapWebView({ disasterStatus, style }) {
             borderRadius: 20,
           }}
           title="Türkiye Afet Haritası"
-          sandbox="allow-scripts allow-same-origin"
         />
       </View>
     );
   }
 
-  // Native: react-native-webview (eğer kuruluysa)
+  // Native: react-native-webview
   try {
     const { WebView } = require('react-native-webview');
     return (
@@ -207,8 +249,9 @@ export default function TurkeyMapWebView({ disasterStatus, style }) {
     );
   } catch {
     return (
-      <View style={[styles.container, style, styles.fallback]}>
+      <View style={[styles.container, style]}>
         <iframe
+          key={iframeKey}
           srcDoc={htmlContent}
           style={{
             width: '100%',
@@ -217,7 +260,6 @@ export default function TurkeyMapWebView({ disasterStatus, style }) {
             borderRadius: 20,
           }}
           title="Türkiye Afet Haritası"
-          sandbox="allow-scripts allow-same-origin"
         />
       </View>
     );
@@ -236,11 +278,31 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 20,
   },
+  loadingWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  loadingText: {
+    color: '#15803d',
+    fontSize: 14,
+    fontWeight: '700',
+  },
   fallback: {
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#f0fdf4',
     borderWidth: 1,
     borderColor: '#bbf7d0',
+    gap: 8,
+  },
+  errorText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#64748b',
+  },
+  errorSub: {
+    fontSize: 12,
+    color: '#94a3b8',
   },
 });

@@ -7,7 +7,7 @@ class ApproveVerificationUseCase {
         this.mailService = mailService;
     }
 
-    async execute({ verificationId, status }) {
+    async execute({ verificationId, status, reportedSafetyStatus }) {
         if (!verificationId) {
             throw new Error('verificationId is required.');
         }
@@ -34,6 +34,9 @@ class ApproveVerificationUseCase {
         if (!matchedUser) {
             throw new Error('Matched user not found.');
         }
+
+        // Kullanıcının durumunu UI'dan gelen değere göre güncelle
+        await this.userRepository.update(matchedUser.id, { safety_status: reportedSafetyStatus || 'SAFE' });
 
         const emergencyContacts = await this.friendRepository.getEmergencyContacts(updatedAlert.user_id);
         const notifications = emergencyContacts.map((contact) => ({

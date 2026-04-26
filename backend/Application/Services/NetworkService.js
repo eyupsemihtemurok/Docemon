@@ -13,9 +13,7 @@ class NetworkService {
             throw new Error('Receiver identifier is required.');
         }
 
-        const receiver = receiverIdentifier.includes('@')
-            ? await this.userRepository.getByEmail(receiverIdentifier)
-            : await this.userRepository.getById(receiverIdentifier);
+        const receiver = await this.userRepository.getByIdentifier(receiverIdentifier);
 
         if (!receiver) {
             throw new Error('Recipient not found.');

@@ -24,8 +24,8 @@ export async function requestJson(path, options = {}) {
   console.log('[HTTP] Request:', { url, method: options.method, headers, body: options.body });
   
   const response = await fetch(url, {
-    headers,
     ...options,
+    headers,
   });
 
   console.log('[HTTP] Response:', { status: response.status, ok: response.ok });

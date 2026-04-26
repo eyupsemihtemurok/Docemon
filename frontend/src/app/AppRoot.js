@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import DashboardNavbar from '../components/dashboard/DashboardNavbar';
 import DashboardSidePanel from '../components/dashboard/DashboardSidePanel';
 import { DASHBOARD_MENU_ITEMS, ROUTES } from '../constants/routes';
@@ -213,6 +212,7 @@ export default function AppRoot() {
           userName={currentUser?.full_name || currentUser?.fullName || currentUser?.email || 'Kullanıcı'}
           onProfilePress={() => navigate(ROUTES.PROFILE)}
           authToken={authToken}
+          userProfile={currentUser}
         />
       )}
       {renderPage()}

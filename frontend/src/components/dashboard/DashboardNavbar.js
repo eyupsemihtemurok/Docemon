@@ -1,13 +1,20 @@
-import { Platform, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 import NotificationBell from '../notifications/NotificationBell';
 
-export default function DashboardNavbar({ userName = 'Kullanıcı', onProfilePress, authToken }) {
+export default function DashboardNavbar({ userName = 'Kullanıcı', onProfilePress, authToken, userProfile }) {
   return (
     <View style={styles.safeAreaContainer}>
       <View style={styles.container}>
         <Pressable style={styles.userSection} onPress={onProfilePress}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{userName.charAt(0).toUpperCase()}</Text>
+            {userProfile?.face_data ? (
+              <Image 
+                source={{ uri: `data:${userProfile.face_mime_type || 'image/jpeg'};base64,${userProfile.face_data}` }} 
+                style={{ width: '100%', height: '100%', borderRadius: 14 }} 
+              />
+            ) : (
+              <Text style={styles.avatarText}>{userName.charAt(0).toUpperCase()}</Text>
+            )}
           </View>
           <View>
             <Text style={styles.welcomeText}>Hoş geldin,</Text>

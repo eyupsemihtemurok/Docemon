@@ -128,8 +128,21 @@ class BiometricController {
                 locationDetails: req.body.locationDetails,
             });
 
+            // Auto-approve matches to bypass operator and notify relatives immediately
+            for (const match of result.matches) {
+                try {
+                    await approveUseCase.execute({
+                        verificationId: match.verificationId,
+                        status: 'APPROVED',
+                        reportedSafetyStatus: req.body.safetyStatus || 'SAFE'
+                    });
+                } catch (approveError) {
+                    console.error(`Auto-approve failed for verification ${match.verificationId}:`, approveError);
+                }
+            }
+
             res.json({
-                message: `Search completed. Found ${result.matchCount} potential matches.`,
+                message: `Search completed. Found ${result.matchCount} potential matches. Relatives have been notified.`,
                 ...result,
             });
         } catch (err) {

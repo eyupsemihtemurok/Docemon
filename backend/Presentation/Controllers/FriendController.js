@@ -51,10 +51,13 @@ class FriendController {
      */
     static async sendRequest(req, res) {
         try {
+            console.log('[FriendController] sendRequest headers:', req.headers['content-type']);
+            console.log('[FriendController] sendRequest body:', req.body);
             const receiverIdentifier = (req.body.receiverIdentifier || req.body.receiverId || req.body.receiverEmail || '').trim();
             const requestId = await networkService.sendFriendRequest(req.user.id, receiverIdentifier);
             res.status(201).json({ message: 'Friend request sent.', requestId });
         } catch (err) {
+            console.error('[FriendController.sendRequest] Error:', err);
             res.status(400).json({ error: err.message });
         }
     }

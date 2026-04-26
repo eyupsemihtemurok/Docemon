@@ -136,19 +136,28 @@ export default function LoginPage({ onLogin, navigate }) {
         }
 
         const formData = new FormData();
-        formData.append("nationalId", registerForm.nationalId);
-        formData.append("fullName", registerForm.fullName);
-        formData.append("email", registerForm.email);
-        formData.append("password", registerForm.password);
-        formData.append("bloodType", registerForm.bloodType || "");
-        formData.append("chronicDiseases", registerForm.chronicDiseases || "");
-        formData.append("birthDate", registerForm.birthDate || "");
-        formData.append("phone", registerForm.phone || "");
-        formData.append("face_data", {
-          uri: registerImage.uri,
-          name: registerImage.name,
-          type: registerImage.type,
-        });
+        formData.append("userData", JSON.stringify({
+          nationalId: registerForm.nationalId,
+          fullName: registerForm.fullName,
+          email: registerForm.email,
+          password: registerForm.password,
+          bloodType: registerForm.bloodType || "",
+          chronicDiseases: registerForm.chronicDiseases || "",
+          birthDate: registerForm.birthDate || "",
+          phone: registerForm.phone || ""
+        }));
+
+        if (Platform.OS === "web") {
+          const res = await fetch(registerImage.uri);
+          const blob = await res.blob();
+          formData.append("image", blob, registerImage.name || "face.jpg");
+        } else {
+          formData.append("image", {
+            uri: registerImage.uri,
+            name: registerImage.name || "face.jpg",
+            type: registerImage.type || "image/jpeg",
+          });
+        }
 
         await registerUser(formData);
 

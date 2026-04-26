@@ -11,7 +11,25 @@ class DisasterRepository extends IDisasterRepository {
      * Create a disaster + insert its districts into disaster_district pivot
      */
     async create(disasterData, districtIds = []) {
-        const { districtIds: _, ...cleanData } = disasterData;
+        const { districtIds: _, ...raw } = disasterData;
+
+        // Map camelCase entity → snake_case DB columns
+        const cleanData = {
+            type:          raw.type,
+            severity:      raw.severity,
+            location_name: raw.locationName  || raw.location_name || null,
+            province_id:   raw.provinceId    || raw.province_id   || null,
+            district_id:   raw.districtId    || raw.district_id   || null,
+            latitude:      raw.latitude      || null,
+            longitude:     raw.longitude     || null,
+            description:   raw.description   || null,
+            created_by:    raw.createdBy     || raw.created_by    || null,
+            start_time:    raw.startTime     || raw.start_time    || new Date(),
+            end_time:      raw.endTime       || raw.end_time      || null,
+            is_active:     raw.isActive !== undefined ? raw.isActive : (raw.is_active !== undefined ? raw.is_active : true),
+        };
+        // Remove undefined/null keys that the DB doesn't expect
+        Object.keys(cleanData).forEach(k => { if (cleanData[k] === undefined) delete cleanData[k]; });
 
         const [inserted] = await db(this.tableName)
             .insert(cleanData)
