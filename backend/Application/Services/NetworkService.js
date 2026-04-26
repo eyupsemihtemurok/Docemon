@@ -42,7 +42,9 @@ class NetworkService {
     }
 
     async respondToRequest(userId, requestId, status) {
+        console.log('[NetworkService] respondToRequest:', { userId, requestId, status });
         const request = await this.friendRepository.getRequestById(requestId);
+        console.log('[NetworkService] Found request:', request);
         if (!request) throw new Error('Friend request not found.');
         
         if (request.receiver_id !== userId) {

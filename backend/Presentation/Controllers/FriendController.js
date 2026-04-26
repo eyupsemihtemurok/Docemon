@@ -106,10 +106,15 @@ class FriendController {
      */
     static async respondRequest(req, res) {
         try {
+            console.log('[FriendController] respondRequest headers:', req.headers['content-type']);
+            console.log('[FriendController] respondRequest body (raw):', req.body);
+            console.log('[FriendController] respondRequest body keys:', Object.keys(req.body));
             const { requestId, status } = req.body;
+            console.log('[FriendController] Extracted:', { requestId, status });
             const result = await networkService.respondToRequest(req.user.id, requestId, status);
             res.json(result);
         } catch (err) {
+            console.error('[FriendController] Error:', err);
             res.status(400).json({ error: err.message });
         }
     }

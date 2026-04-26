@@ -6,6 +6,27 @@ export default StyleSheet.create({
     backgroundColor: '#eef9f0',
   },
 
+  // Üst Bar - Geri Butonu
+  topBar: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#d1fae5',
+  },
+  backButtonText: {
+    color: '#15803d',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+
   // Üst Başlık
   headerBar: {
     padding: 20,

@@ -18,7 +18,7 @@ import styles from './styles/RescueScannerScreen.styles';
  * Sahadan Tanılama Ekranı
  * StyleSheet.create ile stilize edilmiş, kamera öncelikli akış.
  */
-const RescueScannerScreen = () => {
+const RescueScannerScreen = ({ navigate }) => {
   const [healthDetails, setHealthDetails] = useState('');
   const [locationDetails, setLocationDetails] = useState('');
   const [image, setImage] = useState(null);
@@ -114,6 +114,11 @@ const RescueScannerScreen = () => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+      {/* Geri Dönme Butonu */}
+      <Pressable onPress={() => navigate('/dashboard')} style={styles.backButton}>
+        <Text style={styles.backButtonText}>← Geri Dön</Text>
+      </Pressable>
+
       {/* Başlık */}
       <View style={styles.headerBlock}>
         <Text style={styles.headerTitle}>Saha Tanılama</Text>

@@ -64,11 +64,14 @@ class FriendRepository extends IFriendRepository {
     }
 
     async getRequestById(requestId) {
-        return await db(this.tableName).where({ id: requestId }).first();
+        console.log('[FriendRepository] getRequestById:', requestId);
+        const result = await db(this.tableName).where('id', requestId).first();
+        console.log('[FriendRepository] Result:', result);
+        return result;
     }
 
     async updateRequestStatus(requestId, status) {
-        await db(this.tableName).where({ id: requestId }).update({ status });
+        await db(this.tableName).where('id', requestId).update({ status });
     }
 
     async getEmergencyContacts(userId) {
@@ -92,7 +95,7 @@ class FriendRepository extends IFriendRepository {
     }
 
     async updateEmergencyContactStatus(friendshipId, isEmergency) {
-        await db(this.tableName).where({ id: friendshipId }).update({ is_emergency_contact: isEmergency });
+        await db(this.tableName).where('id', friendshipId).update({ is_emergency_contact: isEmergency });
     }
 }
 

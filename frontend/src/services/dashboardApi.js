@@ -30,10 +30,12 @@ export function sendFriendRequest(token, receiverIdentifier) {
 }
 
 export function respondFriendRequest(token, requestId, status) {
+  const body = JSON.stringify({ requestId, status });
+  console.log('[API] respondFriendRequest:', { url: '/api/friends/respond', body, token: token ? 'exists' : 'missing' });
   return requestJson('/api/friends/respond', {
     method: 'POST',
     headers: authHeaders(token),
-    body: JSON.stringify({ requestId, status }),
+    body,
   });
 }
 

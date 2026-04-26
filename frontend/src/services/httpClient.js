@@ -15,13 +15,20 @@ export function getApiBaseUrl() {
 }
 
 export async function requestJson(path, options = {}) {
-  const response = await fetch(`${getApiBaseUrl()}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
+  const url = `${getApiBaseUrl()}${path}`;
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+  };
+  
+  console.log('[HTTP] Request:', { url, method: options.method, headers, body: options.body });
+  
+  const response = await fetch(url, {
+    headers,
     ...options,
   });
+
+  console.log('[HTTP] Response:', { status: response.status, ok: response.ok });
 
   let payload = null;
 

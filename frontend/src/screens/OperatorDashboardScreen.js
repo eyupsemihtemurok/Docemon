@@ -108,6 +108,13 @@ const OperatorDashboardScreen = ({ navigate }) => {
 
   return (
     <View style={styles.container}>
+      {/* Üst Bar: Geri + Başlık */}
+      <View style={styles.topBar}>
+        <Pressable onPress={() => navigate('/dashboard')} style={styles.backButton}>
+          <Text style={styles.backButtonText}>← Geri</Text>
+        </Pressable>
+      </View>
+
       {/* Başlık */}
       <View style={styles.headerBar}>
         <Text style={styles.headerTitle}>Operatör Onay Paneli</Text>

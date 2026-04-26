@@ -87,7 +87,7 @@ function NotifCard({ notif, onMarkRead }) {
   );
 }
 
-export default function NotificationsScreen({ authToken }) {
+export default function NotificationsScreen({ authToken, navigate }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -147,11 +147,20 @@ export default function NotificationsScreen({ authToken }) {
     <View style={styles.container}>
       {/* Page Header */}
       <View style={styles.pageHeader}>
-        <View>
-          <Text style={styles.pageTitle}>Bildirimler</Text>
-          {unreadCount > 0 && (
-            <Text style={styles.pageSubtitle}>{unreadCount} okunmamış bildiriminiz var</Text>
-          )}
+        <View style={{ flex: 1 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            {navigate && (
+              <Pressable onPress={() => navigate('/dashboard')} style={styles.backButton}>
+                <Text style={styles.backButtonText}>←</Text>
+              </Pressable>
+            )}
+            <View>
+              <Text style={styles.pageTitle}>Bildirimler</Text>
+              {unreadCount > 0 && (
+                <Text style={styles.pageSubtitle}>{unreadCount} okunmamış bildiriminiz var</Text>
+              )}
+            </View>
+          </View>
         </View>
         {unreadCount > 0 && (
           <Pressable style={styles.markAllBtn} onPress={handleMarkAllRead}>
@@ -241,6 +250,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 12,
+    gap: 12,
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#dcfce7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#86efac',
+  },
+  backButtonText: {
+    fontSize: 18,
+    color: '#15803d',
+    fontWeight: '700',
   },
   pageTitle: {
     fontSize: 26,

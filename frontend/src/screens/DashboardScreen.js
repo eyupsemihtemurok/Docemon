@@ -135,6 +135,7 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
   };
 
   const handleRespondRequest = async (requestId, status) => {
+    console.log('[Dashboard] handleRespondRequest called with:', { requestId, status });
     setActionLoading(true);
     setDashboardMessage(null);
 
@@ -545,7 +546,10 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
                             <>
                               <Pressable
                                 style={[styles.requestButton, styles.requestButtonPrimary]}
-                                onPress={() => handleRespondRequest(request.requestId, 'ACCEPTED')}
+                                onPress={() => {
+                                  console.log('[Dashboard] Request object:', request);
+                                  handleRespondRequest(request.requestId, 'ACCEPTED');
+                                }}
                                 disabled={actionLoading}
                               >
                                 <Text style={styles.requestButtonIcon}>✅</Text>
@@ -553,7 +557,10 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
                               </Pressable>
                               <Pressable
                                 style={[styles.requestButton, styles.requestButtonSecondary]}
-                                onPress={() => handleRespondRequest(request.requestId, 'REJECTED')}
+                                onPress={() => {
+                                  console.log('[Dashboard] Request object:', request);
+                                  handleRespondRequest(request.requestId, 'REJECTED');
+                                }}
                                 disabled={actionLoading}
                               >
                                 <Text style={styles.requestButtonIcon}>❌</Text>
@@ -597,28 +604,6 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
             style={styles.menuItemPill}
             onPress={() => {
               setIsFabMenuVisible(false);
-              navigate(ROUTES.BIOMETRIC_RESCUE);
-            }}
-          >
-            <Text style={styles.menuItemText}>Saha Tanılama</Text>
-            <Text style={styles.menuItemIcon}>📸</Text>
-          </Pressable>
-
-          <Pressable
-            style={styles.menuItemPill}
-            onPress={() => {
-              setIsFabMenuVisible(false);
-              navigate(ROUTES.BIOMETRIC_REGISTER);
-            }}
-          >
-            <Text style={styles.menuItemText}>Yeni Kayıt</Text>
-            <Text style={styles.menuItemIcon}>👤</Text>
-          </Pressable>
-
-          <Pressable
-            style={styles.menuItemPill}
-            onPress={() => {
-              setIsFabMenuVisible(false);
               navigate(ROUTES.BIOMETRIC_OPERATOR);
             }}
           >
@@ -636,16 +621,6 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
             <Text style={styles.menuItemText}>Afet Haritası</Text>
             <Text style={styles.menuItemIcon}>🗺️</Text>
           </Pressable>
-
-          <Pressable
-            style={[styles.menuItemPill, styles.menuItemPillPrimary]}
-            onPress={() => {
-              setIsFabMenuVisible(false);
-            }}
-          >
-            <Text style={[styles.menuItemText, styles.menuItemTextPrimary]}>Bluetooth Mesh</Text>
-            <Text style={styles.menuItemIcon}>📶</Text>
-          </Pressable>
         </View>
       )}
 
@@ -653,7 +628,7 @@ export default function DashboardScreen({ activeMenuItem, authToken, currentUser
         style={styles.fab}
         onPress={() => setIsFabMenuVisible(!isFabMenuVisible)}
       >
-        <Text style={[styles.fabIcon, isFabMenuVisible && { transform: [{ rotate: '45deg' }] }]}>+</Text>
+        <Text style={[styles.fabIcon, isFabMenuVisible && styles.fabIconRotated]}>+</Text>
       </Pressable>
     </View>
   );
