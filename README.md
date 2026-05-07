@@ -161,7 +161,7 @@ npm run migrate:rollback
 - `HASH_SALT`
 - `PORT`
 - `NODE_ENV`
-- `JWT_SECRET` (kodda fallback var, production için açıkça tanımlanmalı)
+- `JWT_SECRET` (**production ortamında zorunlu olarak tanımlanmalı; fallback/default değere kesinlikle güvenilmemelidir**)
 
 ## Ek Dokümantasyon
 
