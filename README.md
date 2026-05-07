@@ -1,4 +1,4 @@
-# hackathon26
+# Docemon
 
 hackathon26, afet ve acil durum senaryoları için tasarlanan bir platformun temel servislerini içeren monorepo yapısıdır. Projede şu an aktif olarak Express tabanlı bir backend API, MSSQL veritabanı altyapısı ve frontend için placeholder servis bulunmaktadır.
 
